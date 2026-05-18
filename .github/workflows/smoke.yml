@@ -1,0 +1,21 @@
+name: Daily schema-drift smoke
+
+on:
+  schedule:
+    - cron: "0 13 * * *" # 13:00 UTC daily (~06:00 MST)
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: Assert pinned fixture still parses
+        run: uv run pytest -q tests/test_schema_drift.py

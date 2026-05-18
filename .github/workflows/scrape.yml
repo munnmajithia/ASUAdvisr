@@ -1,0 +1,41 @@
+name: Scrape ASU Class Search
+
+on:
+  schedule:
+    # Every 4 hours. Tighten during registration windows by editing the cron.
+    - cron: "0 */4 * * *"
+  workflow_dispatch:
+    inputs:
+      subject:
+        description: Subject code (e.g. CSE)
+        required: false
+        default: CSE
+      term:
+        description: ASU strm code (e.g. 2267 = Fall 2026)
+        required: false
+        default: "2267"
+
+concurrency:
+  group: scrape
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: Run scraper
+        run: |
+          uv run python -m asuadvisr.scraper.asu_class_search \
+            --subject "${{ inputs.subject || 'CSE' }}" \
+            --term "${{ inputs.term || '2267' }}"

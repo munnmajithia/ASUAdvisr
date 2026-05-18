@@ -35,3 +35,17 @@ dist/
 # Spike: superseded intermediate captures (regenerate by re-running probe_classes.py)
 spike/cse_fall26_page1.json
 spike/cse_fall26_page1_run2.json
+
+# Supabase CLI local state
+supabase/.temp/
+supabase/.branches/
+supabase/.env
+
+# Next.js / Vercel
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# Coverage
+coverage/
+.nyc_output/
