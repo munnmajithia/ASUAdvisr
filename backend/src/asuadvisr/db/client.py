@@ -38,7 +38,11 @@ def upsert_section_group(client: Client, group: dict[str, Any]) -> int:
 
 
 def upsert_section(client: Client, section: dict[str, Any]) -> None:
-    client.table("sections").upsert(section, on_conflict="id").execute()
+    row = dict(section)
+    for field in ("start_date", "end_date"):
+        if row.get(field) is not None:
+            row[field] = row[field].isoformat()
+    client.table("sections").upsert(row, on_conflict="id").execute()
 
 
 def replace_meeting_times(client: Client, section_id: int, rows: list[dict[str, Any]]) -> None:
