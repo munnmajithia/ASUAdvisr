@@ -135,7 +135,7 @@ def _parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-if __name__ == "__main__":
+def main() -> None:
     args = _parse_args()
     logging.basicConfig(
         level=args.log_level,
@@ -143,3 +143,7 @@ if __name__ == "__main__":
         datefmt="%Y-%m-%dT%H:%M:%S",
     )
     run(args.subject, args.term)
+
+
+if __name__ == "__main__":
+    main()

@@ -36,6 +36,6 @@ jobs:
       - run: uv sync --frozen
       - name: Run scraper
         run: |
-          uv run python -m asuadvisr.scraper.asu_class_search \
+          uv run asu-scrape \
             --subject "${{ inputs.subject || 'CSE' }}" \
             --term "${{ inputs.term || '2267' }}"
