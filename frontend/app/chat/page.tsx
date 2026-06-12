@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { AuthGate } from "@/components/auth-gate";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
@@ -86,6 +88,14 @@ function summaryChips(c: Constraints): string[] {
 type Step = "input" | "confirming" | "results";
 
 export default function ChatPage() {
+  return (
+    <AuthGate>
+      <ChatFlow />
+    </AuthGate>
+  );
+}
+
+function ChatFlow() {
   const [step, setStep] = useState<Step>("input");
   const [chatText, setChatText] = useState("");
   const [constraints, setConstraints] = useState<Constraints>(emptyConstraints());
