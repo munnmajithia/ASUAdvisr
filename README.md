@@ -6,7 +6,7 @@ The product hypothesis: students prefer conversational scheduling to MyASU's exi
 
 **Architectural principle:** LLMs handle extraction, interpretation, and conversation. Deterministic code handles validation and schedule generation.
 
-Build plan and milestone details live in [the planning doc](https://github.com/munnmajithia/ASUAdvisr) (kept locally during development).
+Product vision and strategy: [docs/VISION.md](docs/VISION.md). Milestones and phase gates: [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Repo layout
 
