@@ -11,6 +11,7 @@ import type {
   ScheduleRequest,
   ScheduleResponse,
 } from "@/lib/api-types";
+import type { RequirementProfile } from "@/lib/profile";
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -32,8 +33,11 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     res = await fetch(`${API_BASE}${path}`, {
       ...init,
       headers: {
-        // Only send a JSON content-type when there's a body to describe.
-        ...(init?.body ? { "Content-Type": "application/json" } : {}),
+        // Only send a JSON content-type when there's a body to describe; for
+        // FormData let the browser set multipart/form-data with its boundary.
+        ...(init?.body && !(init.body instanceof FormData)
+          ? { "Content-Type": "application/json" }
+          : {}),
         ...init?.headers,
       },
     });
@@ -82,4 +86,11 @@ export async function getSchedule(req: ScheduleRequest): Promise<ScheduleRespons
     method: "POST",
     body: JSON.stringify(req),
   });
+}
+
+/** `POST /extract-requirements` — DARS PDF (multipart `file`) → requirement profile. */
+export async function extractProfile(file: File): Promise<RequirementProfile> {
+  const form = new FormData();
+  form.append("file", file);
+  return request<RequirementProfile>("/extract-requirements", { method: "POST", body: form });
 }
