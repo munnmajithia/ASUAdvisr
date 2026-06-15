@@ -4,6 +4,9 @@ Execution sequencing for the vision in [VISION.md](VISION.md). Milestones are ga
 quality, not calendar dates. The one timing anchor: user testing is only meaningful during a
 registration window.
 
+This file is the **strategic** view. The **live tactical board** — every open task with its
+dependencies, gate, and tests — is [EXECUTION.md](EXECUTION.md).
+
 ## Status (updated 2026-06-12)
 
 | Milestone | State |
@@ -12,22 +15,25 @@ registration window.
 | M1.0 — repo scaffold | ✅ Done |
 | M1.1 — data foundation (schema, scraper, parser) | ✅ Done |
 | M2 — deterministic scheduler + API + schedule UI | ✅ Done |
-| M3 — constraint parser + chat UI | 🔶 Parser + chat built; magic-link auth remaining |
-| M4 — DARS + major map extraction | ⬜ Not started |
+| M3 — constraint parser + chat UI + magic-link auth | ✅ Done |
+| M4 — DARS extraction + review + integration | 🔶 In progress — see [EXECUTION.md](EXECUTION.md) |
 | M5 — user test | ⬜ Not started |
 
 ## MVP milestones (M3–M5)
 
-### M3 — Conversational constraints *(close-out)*
-Remaining: wire Supabase magic-link auth into the chat page.
-**Gate:** signed-in user chats "12–15 credits, no Friday, nothing before 10am" → constraints
-parse → valid schedules render.
+### M3 — Conversational constraints ✅
+Signed-in user chats "12–15 credits, no Friday, nothing before 10am" → constraints parse → valid
+schedules render. Done (magic-link auth committed in `e145fa2`).
 
-### M4 — Requirement extraction
+### M4 — Requirement extraction + end-to-end flow
 DARS + major map PDF upload → PyMuPDF text extraction → LLM → `RequirementProfile` JSON →
-**mandatory editable review UI** → confirmed profile feeds the scheduler. Extraction is draft
-data, not truth; expect 60–70% raw accuracy and let the review UI close the gap.
-**Gate:** a real CSE DARS PDF extracts ≥80% of required courses; review UI fixes the rest.
+**mandatory editable review UI** → confirmed profile feeds the scheduler, plus the glue that wires
+upload → review → chat → schedule into one flow. Extraction is draft data, not truth; expect
+60–70% raw accuracy and let the review UI close the gap. Scope now also includes three low-hanging
+add-ons pulled forward from P1 (seat status + open-only filter, soft-constraint ranking, instructor
+names); calendar export stays in P1.
+**Gate:** a real CSE DARS PDF extracts ≥80% of required courses; review UI fixes the rest; the full
+flow runs end-to-end. Task-level breakdown in [EXECUTION.md](EXECUTION.md).
 
 ### M5 — User test
 5 real ASU CS students run the full flow unaided.
@@ -40,9 +46,9 @@ scheduling. No artificial deadline before it; don't miss it either.
 Built only after M5 gives signal. Each phase gates the next.
 
 ### P1 — Scheduling depth
-Restores the MVP scope cuts to make the student wedge sharp: soft-constraint ranking, schedule
-lock + regenerate, calendar export, prerequisite validation against completed courses, all ASU
-undergraduate majors.
+Restores the remaining MVP scope cuts to make the student wedge sharp: schedule lock + regenerate,
+calendar (.ics) export, prerequisite validation against completed courses, all ASU undergraduate
+majors. (Soft-constraint ranking, seat status, and instructor names were pulled forward into M4.)
 **Gate:** a non-CSE student can use the product unaided.
 
 ### P2 — Data moats

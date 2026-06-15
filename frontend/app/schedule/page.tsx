@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+import { getCourses, getSchedule } from "@/lib/api";
+import { DAYS, type ApiConstraints, type Day, type ScheduleOut } from "@/lib/api-types";
 
-const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
-type Day = (typeof DAYS)[number];
 const DAY_LABELS: Record<Day, string> = {
   mon: "Mon",
   tue: "Tue",
@@ -15,25 +14,6 @@ const DAY_LABELS: Record<Day, string> = {
   sat: "Sat",
   sun: "Sun",
 };
-
-interface SectionDetail {
-  id: number;
-  course_key: string;
-  component: string;
-  instruction_mode: string;
-  days: string;
-  time_range: string;
-}
-
-interface ScheduleOut {
-  sections: SectionDetail[];
-  total_credits: number;
-}
-
-interface ScheduleResponse {
-  schedules: ScheduleOut[];
-  count: number;
-}
 
 const MODE_LABELS: Record<string, string> = {
   P: "In Person",
@@ -53,10 +33,9 @@ export default function SchedulePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${API_BASE}/courses`)
-      .then((r) => r.json())
-      .then((data: { courses: string[] }) => setAllCourses(data.courses))
-      .catch(() => setError("Could not reach the API. Is the backend running?"));
+    getCourses()
+      .then(setAllCourses)
+      .catch((err) => setError(err instanceof Error ? err.message : "Could not load courses."));
   }, []);
 
   function toggleCourse(key: string) {
@@ -82,22 +61,19 @@ export default function SchedulePage() {
     setError(null);
     setResults(null);
     try {
-      const body = {
-        requirements: [...selected].map((key) => ({ course_keys: [key], pick: 1 })),
-        constraints: {
-          avoid_days: [...avoidDays],
-          earliest_start: earliestStart || null,
-          latest_end: latestEnd || null,
-        },
-        max_results: 50,
+      const constraints: ApiConstraints = {
+        avoid_days: [...avoidDays],
+        earliest_start: earliestStart || null,
+        latest_end: latestEnd || null,
+        min_credits: null,
+        max_credits: null,
+        preferred_modality: null,
       };
-      const res = await fetch(`${API_BASE}/schedule`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+      const data = await getSchedule({
+        requirements: [...selected].map((key) => ({ course_keys: [key], pick: 1 })),
+        constraints,
+        max_results: 50,
       });
-      if (!res.ok) throw new Error(`API error ${res.status}`);
-      const data: ScheduleResponse = await res.json();
       setResults(data.schedules);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -119,7 +95,7 @@ export default function SchedulePage() {
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Course picker */}
         <section>
-          <h2 className="mb-3 text-sm font-medium uppercase tracking-widest text-zinc-400">
+          <h2 className="mb-3 text-sm font-medium tracking-widest text-zinc-400 uppercase">
             Courses
           </h2>
           {allCourses.length === 0 && !error && (
@@ -148,7 +124,7 @@ export default function SchedulePage() {
 
         {/* Constraints */}
         <section>
-          <h2 className="mb-3 text-sm font-medium uppercase tracking-widest text-zinc-400">
+          <h2 className="mb-3 text-sm font-medium tracking-widest text-zinc-400 uppercase">
             Constraints
           </h2>
           <div className="flex flex-wrap gap-6">
@@ -253,20 +229,17 @@ export default function SchedulePage() {
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="text-left text-zinc-400">
-                      <th className="pb-1 pr-4 font-medium">Class #</th>
-                      <th className="pb-1 pr-4 font-medium">Course</th>
-                      <th className="pb-1 pr-4 font-medium">Type</th>
-                      <th className="pb-1 pr-4 font-medium">Mode</th>
-                      <th className="pb-1 pr-4 font-medium">Days</th>
+                      <th className="pr-4 pb-1 font-medium">Class #</th>
+                      <th className="pr-4 pb-1 font-medium">Course</th>
+                      <th className="pr-4 pb-1 font-medium">Type</th>
+                      <th className="pr-4 pb-1 font-medium">Mode</th>
+                      <th className="pr-4 pb-1 font-medium">Days</th>
                       <th className="pb-1 font-medium">Time</th>
                     </tr>
                   </thead>
                   <tbody>
                     {sched.sections.map((sec) => (
-                      <tr
-                        key={sec.id}
-                        className="border-t border-zinc-100 dark:border-zinc-800"
-                      >
+                      <tr key={sec.id} className="border-t border-zinc-100 dark:border-zinc-800">
                         <td className="py-1 pr-4 font-mono text-zinc-500">{sec.id}</td>
                         <td className="py-1 pr-4 font-medium text-zinc-800 dark:text-zinc-100">
                           {sec.course_key}

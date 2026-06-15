@@ -11,22 +11,29 @@ type AuthState =
   | { status: "signed_in"; session: Session };
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
-  // Created in useEffect so the page can statically prerender without Supabase env vars.
-  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
+  // Created lazily on the client so the page can statically prerender (server returns null).
+  const [supabase] = useState<SupabaseClient | null>(() =>
+    typeof window === "undefined" ? null : getBrowserSupabase(),
+  );
   const [auth, setAuth] = useState<AuthState>({ status: "loading" });
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setSupabase(getBrowserSupabase());
-  }, []);
-
-  useEffect(() => {
     if (!supabase) return;
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setAuth(session ? { status: "signed_in", session } : { status: "signed_out" });
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setAuth(session ? { status: "signed_in", session } : { status: "signed_out" });
+      })
+      .catch((err: unknown) => {
+        // Don't get stuck on "Loading…" — fall back to the sign-in form and surface why.
+        setError(
+          err instanceof Error ? err.message : "Couldn’t check your session. Please sign in.",
+        );
+        setAuth({ status: "signed_out" });
+      });
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -72,8 +79,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       <div className="mx-auto max-w-sm px-4 py-20 text-center font-sans">
         <h1 className="mb-2 text-xl font-semibold tracking-tight">Check your email</h1>
         <p className="text-sm text-zinc-500">
-          We sent a sign-in link to <span className="font-medium">{auth.email}</span>. Open it
-          on this device to continue.
+          We sent a sign-in link to <span className="font-medium">{auth.email}</span>. Open it on
+          this device to continue.
         </p>
         <button
           type="button"
@@ -100,7 +107,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@asu.edu"
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
           />
           <button
             type="submit"
