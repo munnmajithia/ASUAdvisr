@@ -119,7 +119,7 @@ export default function SchedulePage() {
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Course picker */}
         <section>
-          <h2 className="mb-3 text-sm font-medium uppercase tracking-widest text-zinc-400">
+          <h2 className="mb-3 text-sm font-medium tracking-widest text-zinc-400 uppercase">
             Courses
           </h2>
           {allCourses.length === 0 && !error && (
@@ -148,7 +148,7 @@ export default function SchedulePage() {
 
         {/* Constraints */}
         <section>
-          <h2 className="mb-3 text-sm font-medium uppercase tracking-widest text-zinc-400">
+          <h2 className="mb-3 text-sm font-medium tracking-widest text-zinc-400 uppercase">
             Constraints
           </h2>
           <div className="flex flex-wrap gap-6">
@@ -253,20 +253,17 @@ export default function SchedulePage() {
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="text-left text-zinc-400">
-                      <th className="pb-1 pr-4 font-medium">Class #</th>
-                      <th className="pb-1 pr-4 font-medium">Course</th>
-                      <th className="pb-1 pr-4 font-medium">Type</th>
-                      <th className="pb-1 pr-4 font-medium">Mode</th>
-                      <th className="pb-1 pr-4 font-medium">Days</th>
+                      <th className="pr-4 pb-1 font-medium">Class #</th>
+                      <th className="pr-4 pb-1 font-medium">Course</th>
+                      <th className="pr-4 pb-1 font-medium">Type</th>
+                      <th className="pr-4 pb-1 font-medium">Mode</th>
+                      <th className="pr-4 pb-1 font-medium">Days</th>
                       <th className="pb-1 font-medium">Time</th>
                     </tr>
                   </thead>
                   <tbody>
                     {sched.sections.map((sec) => (
-                      <tr
-                        key={sec.id}
-                        className="border-t border-zinc-100 dark:border-zinc-800"
-                      >
+                      <tr key={sec.id} className="border-t border-zinc-100 dark:border-zinc-800">
                         <td className="py-1 pr-4 font-mono text-zinc-500">{sec.id}</td>
                         <td className="py-1 pr-4 font-medium text-zinc-800 dark:text-zinc-100">
                           {sec.course_key}

@@ -39,9 +39,7 @@ def test_earliest_start() -> None:
 
 
 def test_latest_end() -> None:
-    result = parse_constraints(
-        "done by 5pm", client=_mock_client({"latest_end": "17:00"})
-    )
+    result = parse_constraints("done by 5pm", client=_mock_client({"latest_end": "17:00"}))
     assert result.latest_end == "17:00"
 
 
@@ -55,9 +53,7 @@ def test_credit_range() -> None:
 
 
 def test_modality_online() -> None:
-    result = parse_constraints(
-        "online only", client=_mock_client({"preferred_modality": "OL"})
-    )
+    result = parse_constraints("online only", client=_mock_client({"preferred_modality": "OL"}))
     assert result.preferred_modality == "OL"
 
 
@@ -71,12 +67,14 @@ def test_modality_in_person() -> None:
 def test_combined() -> None:
     result = parse_constraints(
         "no Friday, nothing before 10am, 12-15 credits",
-        client=_mock_client({
-            "avoid_days": ["fri"],
-            "earliest_start": "10:00",
-            "min_credits": 12.0,
-            "max_credits": 15.0,
-        }),
+        client=_mock_client(
+            {
+                "avoid_days": ["fri"],
+                "earliest_start": "10:00",
+                "min_credits": 12.0,
+                "max_credits": 15.0,
+            }
+        ),
     )
     assert result.avoid_days == ["fri"]
     assert result.earliest_start == "10:00"
