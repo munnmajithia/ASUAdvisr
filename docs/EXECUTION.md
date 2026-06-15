@@ -27,19 +27,27 @@ client (`lib/api.ts`) · AuthGate robustness.
 - **No `Authorization` header on API calls.** The backend verifies no JWT (stateless); per-user
   data is written frontend-direct through the RLS-scoped Supabase client. Do **not** add a bearer
   header to `lib/api.ts` (resolves the old task-5 gate note).
-- **Canonical `RequirementProfile`** — the **wired** shape (in `llm/requirement_profile.py`, matched
-  by migration 0002 and the planned TS type):
+- **Canonical `RequirementProfile`** — the **richer** shape from `llm/requirement_extractor.py`
+  (chosen 2026-06-15; the simpler `requirement_profile.py` + child tables are retired in B2/PR #17):
   ```jsonc
   {
-    "catalog_year": "2024-2025", "major": "Computer Science",
-    "completed_courses": ["CSE 110", "MAT 265"],
-    "required_courses_remaining": ["CSE 310", "CSE 355"],
-    "choice_groups": [{ "name": "CS Electives", "pick": 1, "course_keys": ["CSE 412", "CSE 420"] }]
+    "catalog_year": "Fall 2023", "major": "Computer Science (BS)",
+    "completed_courses": [
+      { "course": "CSE 110", "title": "...", "grade": "B", "term": "FA23", "credits": 3, "in_progress": false }
+    ],
+    "remaining_requirements": [
+      { "label": "CSE 355", "options": ["CSE 355"], "pick": 1, "credits_needed": 3, "note": null },
+      { "label": "CSE 412 OR 434 OR 445", "options": ["CSE 412","CSE 434","CSE 445"], "pick": 1 },
+      { "label": "CSE 4xx Electives", "options": [], "credits_needed": 12, "note": "any CSE 4xx, NOT FROM CSE 430" }
+    ]
   }
   ```
-  Map to the scheduler's `{course_keys, pick}`: required → `{course_keys:[c], pick:1}`; choice group
-  with keys → `{course_keys, pick}`; completed + keyless-filter-only groups excluded. (The richer
-  `requirement_extractor.py` schema is dead/unwired and is being retired — see B2.)
+  **Scheduler mapping** (`RequirementProfile.to_requirements()`): each `remaining_requirement` with
+  non-empty `options` → `{course_keys: options, pick}`; **empty-`options`** ones (wildcards / hour-based)
+  are excluded and surfaced by `unresolved_requirements()` for the review UI to resolve.
+- **Persistence = JSONB** (migration 0003): the whole profile is one `requirement_profiles` row with
+  `catalog_year`, `major`, and `completed_courses` / `remaining_requirements` as JSONB columns (no
+  child tables). RLS scopes the row to `auth.uid()`.
 
 ## Ownership lanes
 - **Backend lane → owned by the active session (claude).** B1–B3 + the local venv fix.
@@ -51,16 +59,16 @@ client (`lib/api.ts`) · AuthGate robustness.
 | ID | Priority | PR title | Key files / goal | Deps |
 |----|----------|----------|------------------|------|
 | B1 | P0 | `chore: remove stray duplicate files` | Delete 10 untracked `* 2.*` macOS dups (4 under `backend/src` are linted/typed; also `frontend/lib/*  2.ts`, dup `0002 2.sql`, `* 2.md`). `find . -name '* 2.*' -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/.next/*' -delete`; add `* 2.*` to `.gitignore`. | — |
-| B2 | P1 | `refactor: consolidate DARS extractors` | Keep the wired `dars_extractor.py`/`requirement_profile.py`. Port the dead `requirement_extractor.py`'s guards (raise on `stop_reason=='max_tokens'`; replace bare `next(...)` over tool-use blocks — **throws unhandled `StopIteration` on an LLM refusal** — with a clear `RuntimeError`) and its uAchieve/DARS prompt into `dars_extractor.py`; migrate its real-DARS fixture test; then delete `requirement_extractor.py` + its test. | — |
-| B3 | P1 | `fix: guard scheduler against empty-options requirements` | `to_requirements()` must report dropped keyless groups (not skip silently); never let an empty-`course_keys` `CourseRequirement` reach `enumerate_schedules` (which returns `[]` for any unsatisfiable req); `/schedule` should signal which reqs yielded zero candidates. Test: keyless/wildcard-only profile doesn't silently yield `[]`. | — |
+| B2 | P1 | ✅ **DONE** (PR #17) `refactor: adopt richer RequirementProfile schema` | Made `requirement_extractor.py` (richer `remaining_requirements`, Opus, validated) canonical; added `to_requirements()`/`unresolved_requirements()`; wired the endpoint; deleted `dars_extractor.py`/`requirement_profile.py`; migration 0003 (JSONB). The richer extractor already failed loudly on refusal/`max_tokens` (audit's crash concern resolved). | — |
+| B3 | P2 | `feat: /schedule reports unschedulable requirements` | Profile-side guard is **done in B2** (`to_requirements()` excludes empty-`options`; `unresolved_requirements()` surfaces them). Remaining optional polish: have `/schedule` (or a new field) report which requirements yielded zero candidates so the UI can explain an empty result instead of a bare `[]`. | B2 |
 | — | P2 | (local, no PR) regenerate `.venv` | `backend/.venv/.../asuadvisr.pth` is malformed (`import _virtualenv` run into the src path). `uv sync --reinstall`. Local-only; gates/CI unaffected. | — |
 
 ### Frontend lane (handoff)
 | ID | Priority | PR title | Key files / goal | Deps |
 |----|----------|----------|------------------|------|
 | F1 | P0 | `feat: add extractProfile multipart helper` | `lib/api.ts`: `extractProfile(file): Promise<RequirementProfile>` — `FormData` with key `file` (endpoint param is `Annotated[UploadFile, File()]`). `request()` force-sets JSON content-type, so special-case `FormData` (let the browser set the multipart boundary) or use a dedicated fetch. No auth header. | — |
-| F2 | P0 | `feat: requirement-profile data layer` | `lib/profile.ts`: TS `RequirementProfile` (wired shape above) + `saveProfile`/`loadProfile` via `getBrowserSupabase()` (parent + 4 child tables, `user_id` from session) + `profileToRequirements()` mapping. | migration (merged) |
-| F3 | P0 | `feat: mandatory editable requirement review UI` | `components/requirement-review.tsx`: editable form over the draft profile. **Must visibly warn on every keyless / filter-only choice group and require concrete `course_keys`** (else scheduling silently returns zero — see B3). Confirm → `saveProfile()` → `/chat`. | F2 |
+| F2 | P0 | `feat: requirement-profile data layer` | `lib/profile.ts`: TS `RequirementProfile` = **richer shape above** (`completed_courses[{course,…}]`, `remaining_requirements[{label,options,pick,credits_needed,note}]`). `saveProfile`/`loadProfile` via `getBrowserSupabase()` — **one `requirement_profiles` row with JSONB columns** (migration 0003), `user_id` from session. `profileToRequirements()` mirrors `to_requirements()`: each `remaining_requirement` with non-empty `options` → `{course_keys: options, pick}`; skip empty-`options`. | B2 (merged) |
+| F3 | P0 | `feat: mandatory editable requirement review UI` | `components/requirement-review.tsx`: editable form over the draft profile (edit catalog_year/major, completed_courses, remaining_requirements). **Must visibly flag every `remaining_requirement` with empty `options`** (wildcards/hour-based, shown via `note`/`credits_needed`) and require the student to fill concrete courses — else they're silently excluded from scheduling. Confirm → `saveProfile()` → `/chat`. | F2 |
 | F4 | P0 | `feat: DARS upload onboarding page` | `app/onboarding/page.tsx` in `<AuthGate>`: PDF input (reject non-PDF) → `extractProfile(file)` → draft → `<RequirementReview>`. Surface 422 / 502 / backend-down. | F1, F3 |
 | F5 | P0 | `feat: drive chat from confirmed profile` | `app/chat/page.tsx`: `loadProfile()` on mount (→ `/onboarding` if none); build requirements from `profileToRequirements()` not the manual picker; confirmed courses read-only + 'edit profile' link. **Sole owner of `chat/page.tsx`** (sequence F8 after). | F2 |
 | F6 | P0 | `feat: auth-aware landing page` | Replace `app/page.tsx` (still create-next-app template); update `layout.tsx` metadata to ASUAdvisr. Routing: signed-out → sign-in; signed-in → `loadProfile()` → `/onboarding` or `/chat`. **Sole owner of `layout.tsx`**. | F2 |
