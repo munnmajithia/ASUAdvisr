@@ -58,6 +58,11 @@ class RemainingRequirement(BaseModel):
     """An unmet requirement: take `pick` course(s) from `options`.
 
     Maps onto the scheduler's CourseRequirement(course_keys=options, pick=pick).
+    Open requirements — wildcards ('CSE 4xx'), gen-studies areas, and hour-based
+    needs — carry empty `options` (with `credits_needed`). These are NOT directly
+    schedulable: the review UI must resolve them to concrete course codes, and the
+    caller must not forward an empty-`options` requirement to the scheduler (an
+    unsatisfiable requirement makes the enumerator return zero schedules).
     """
 
     label: str = Field(
@@ -118,6 +123,14 @@ _SYSTEM = (
     "A specific course → options is that one course, pick 1. An 'A OR B OR C' choice → all options, "
     "pick 1. A wildcard/open elective ('CSE 4** Electives', technical electives) → leave options "
     "empty, set credits_needed, and put the wildcard pattern and any NOT-FROM exclusions in note.\n"
+    "- Hour-based requirements count too: when the audit says the student still NEEDS a number "
+    "of hours not tied to specific courses (free elective hours, remaining upper-division hours), "
+    "record it as a remaining_requirement with empty options, credits_needed = the hours, and a "
+    "plain label (e.g. 'Free Electives').\n"
+    "- Skip requirements the audit marks informational or athlete-only (e.g. a NEEDS-hours note "
+    "flagged 'for STUDENT ATHLETE DEVELOPMENT ONLY').\n"
+    "- Keep `label` to the course code or requirement/area name; do NOT append ': N hours' or "
+    "'C minimum' to it — those belong in credits_needed / note.\n"
     "- Do NOT list satisfied requirements, and do NOT put in-progress courses in "
     "remaining_requirements (they belong in completed_courses with in_progress=true)."
 )
