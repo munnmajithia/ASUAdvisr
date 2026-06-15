@@ -28,6 +28,7 @@ from asuadvisr.scheduler.constraints import (
     conflicts_with_any,
     section_passes_constraints,
 )
+from asuadvisr.scheduler.rank import schedule_score
 from asuadvisr.scraper.parse import parse_record
 
 
@@ -145,9 +146,17 @@ def enumerate_schedules(
     max_results: int = 50,
     timeout_seconds: float = 2.0,
 ) -> list[Schedule]:
-    """Return up to max_results valid non-conflicting schedules."""
+    """Return up to max_results valid non-conflicting schedules.
+
+    When soft preferences are set, gather a larger candidate pool (within the
+    timeout), rank it by soft score, and return the best max_results.
+    """
     results: list[Schedule] = []
     deadline = _time_mod.monotonic() + timeout_seconds
+
+    needs_ranking = constraints.compact_schedule or bool(constraints.prefer_time_of_day)
+    # Gather more than we return when ranking, so the "best" aren't lost to the cap.
+    gather_cap = min(max(max_results * 5, 200), 1000) if needs_ranking else max_results
 
     # Build one list of candidate picks per requirement slot.
     # A choice group (pick=1 of N) merges all N courses' candidates together.
@@ -165,7 +174,7 @@ def enumerate_schedules(
     candidate_lists.sort(key=lambda cl: len(cl))
 
     def _backtrack(idx: int, chosen: list[list[SectionNode]]) -> None:
-        if len(results) >= max_results or _time_mod.monotonic() > deadline:
+        if len(results) >= gather_cap or _time_mod.monotonic() > deadline:
             return
         if idx == len(candidate_lists):
             section_ids = [s.id for pick in chosen for s in pick]
@@ -184,8 +193,25 @@ def enumerate_schedules(
                 chosen.append(pick)
                 _backtrack(idx + 1, chosen)
                 chosen.pop()
-                if len(results) >= max_results or _time_mod.monotonic() > deadline:
+                if len(results) >= gather_cap or _time_mod.monotonic() > deadline:
                     return
 
     _backtrack(0, [])
+
+    if needs_ranking and results:
+        node_by_id: dict[int, SectionNode] = {
+            node.id: node for nodes in sections_by_course.values() for node in nodes
+        }
+
+        def _score(sched: Schedule) -> float:
+            slots = [
+                slot
+                for sid in sched.section_ids
+                if sid in node_by_id
+                for slot in node_by_id[sid].meeting_slots
+            ]
+            return schedule_score(slots, constraints)
+
+        results.sort(key=_score)
+        return results[:max_results]
     return results

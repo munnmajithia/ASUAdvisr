@@ -32,6 +32,9 @@ class ScheduleConstraints:
     max_credits: float | None = None
     preferred_modality: str | None = None  # 'P', 'OL', 'HY'
     only_open: bool = False  # drop sections whose enrl_stat != 'O'
+    # Soft preferences — these rank results, they do not filter them.
+    compact_schedule: bool = False  # prefer fewer days / smaller gaps
+    prefer_time_of_day: str | None = None  # 'morning', 'afternoon', 'evening'
 
 
 def has_conflict(a: MeetingSlot, b: MeetingSlot) -> bool:

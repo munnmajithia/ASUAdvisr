@@ -14,8 +14,10 @@ _MODEL = "claude-haiku-4-5-20251001"
 
 _SYSTEM = (
     "You are a scheduling assistant for ASU students. "
-    "Extract hard scheduling constraints from the student's message. "
-    "Only extract constraints that are explicitly stated — do not infer or assume. "
+    "Extract scheduling constraints and preferences from the student's message. "
+    "Hard constraints (days, times, credits, modality) filter schedules; soft "
+    "preferences (compact schedule, time of day) only rank them. "
+    "Only extract what is explicitly stated — do not infer or assume. "
     "Convert times to 24-hour HH:MM format (e.g. '10am' → '10:00', '2:30pm' → '14:30')."
 )
 
@@ -54,6 +56,16 @@ _TOOL: dict[str, Any] = {
                 "enum": ["P", "OL", "HY"],
                 "description": "P = in-person, OL = online, HY = hybrid.",
             },
+            "compact_schedule": {
+                "type": "boolean",
+                "description": "True if the student wants a compact schedule — classes close "
+                "together, fewer days on campus, minimal gaps. Soft preference (ranks only).",
+            },
+            "prefer_time_of_day": {
+                "type": "string",
+                "enum": ["morning", "afternoon", "evening"],
+                "description": "Preferred time of day for classes. Soft preference (ranks only).",
+            },
         },
         "required": [],
     },
@@ -69,6 +81,8 @@ class ParsedConstraints(BaseModel):
     min_credits: float | None = None
     max_credits: float | None = None
     preferred_modality: str | None = None  # "P", "OL", or "HY"
+    compact_schedule: bool = False  # soft: prefer fewer days / smaller gaps
+    prefer_time_of_day: str | None = None  # soft: "morning", "afternoon", "evening"
 
 
 def parse_constraints(

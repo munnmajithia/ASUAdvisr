@@ -101,3 +101,23 @@ def test_tool_choice_forced() -> None:
     parse_constraints("whatever", client=client)
     kwargs = client.messages.create.call_args.kwargs
     assert kwargs["tool_choice"] == {"type": "tool", "name": "extract_constraints"}
+
+
+def test_compact_schedule_extracted() -> None:
+    result = parse_constraints(
+        "I'd like a compact schedule", client=_mock_client({"compact_schedule": True})
+    )
+    assert result.compact_schedule is True
+
+
+def test_prefer_time_of_day_extracted() -> None:
+    result = parse_constraints(
+        "morning classes please", client=_mock_client({"prefer_time_of_day": "morning"})
+    )
+    assert result.prefer_time_of_day == "morning"
+
+
+def test_soft_prefs_default_off() -> None:
+    result = parse_constraints("no preference", client=_mock_client({}))
+    assert result.compact_schedule is False
+    assert result.prefer_time_of_day is None
