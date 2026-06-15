@@ -5,7 +5,13 @@ import { useEffect, useState } from "react";
 
 import { AuthGate } from "@/components/auth-gate";
 import { getSchedule, parseConstraints } from "@/lib/api";
-import { DAYS, type ApiConstraints, type Day, type Requirement, type ScheduleOut } from "@/lib/api-types";
+import {
+  DAYS,
+  type ApiConstraints,
+  type Day,
+  type Requirement,
+  type ScheduleOut,
+} from "@/lib/api-types";
 import { loadProfile, profileToRequirements, type RequirementProfile } from "@/lib/profile";
 
 const DAY_LABELS: Record<Day, string> = {
