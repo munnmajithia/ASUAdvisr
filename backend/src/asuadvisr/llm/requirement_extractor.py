@@ -29,6 +29,7 @@ import anthropic
 import fitz  # PyMuPDF
 from pydantic import BaseModel, Field
 
+from asuadvisr.scheduler.enumerate import CourseRequirement
 from asuadvisr.settings import get_settings
 
 _MODEL = "claude-opus-4-8"
@@ -92,6 +93,31 @@ class RequirementProfile(BaseModel):
     )
     completed_courses: list[CompletedCourse] = Field(default_factory=list)
     remaining_requirements: list[RemainingRequirement] = Field(default_factory=list)
+
+    def to_requirements(self) -> list[CourseRequirement]:
+        """Schedulable requirements → scheduler input.
+
+        Each remaining requirement with concrete ``options`` becomes a
+        ``CourseRequirement(course_keys=options, pick=pick)``. Requirements with no
+        options (wildcards, open electives, hour-based needs) are **excluded** — they
+        can't be scheduled until the student resolves them into concrete courses in
+        the review UI (see :meth:`unresolved_requirements`). This guarantees no
+        empty-``course_keys`` requirement reaches the enumerator (which would make the
+        whole request unsatisfiable).
+        """
+        return [
+            CourseRequirement(course_keys=list(req.options), pick=req.pick)
+            for req in self.remaining_requirements
+            if req.options
+        ]
+
+    def unresolved_requirements(self) -> list[RemainingRequirement]:
+        """Remaining requirements with no concrete ``options``.
+
+        These (wildcard/open-elective/hour-based needs) can't be scheduled as-is; the
+        review UI must surface them so the student picks concrete courses.
+        """
+        return [req for req in self.remaining_requirements if not req.options]
 
 
 # ─── Prompt + tool ────────────────────────────────────────────────────────────

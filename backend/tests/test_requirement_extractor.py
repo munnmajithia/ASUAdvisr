@@ -193,3 +193,24 @@ def test_truncated_extraction_raises() -> None:
 
     with pytest.raises(RuntimeError, match="truncated"):
         extract_requirements("...", client=client)
+
+
+# ─── profile → scheduler mapping ──────────────────────────────────────────────
+
+
+def test_to_requirements_maps_options_and_pick() -> None:
+    profile = extract_requirements("<audit text>", client=_mock_client(_SAMPLE_INPUT))
+    reqs = profile.to_requirements()
+    # Two concrete requirements map through; the empty-options wildcard is excluded.
+    assert len(reqs) == 2
+    by_keys = {tuple(r.course_keys): r for r in reqs}
+    assert by_keys[("CSE 355",)].pick == 1
+    assert by_keys[("CSE 412", "CSE 434", "CSE 445")].pick == 1
+
+
+def test_unresolved_requirements_are_keyless() -> None:
+    profile = extract_requirements("<audit text>", client=_mock_client(_SAMPLE_INPUT))
+    unresolved = profile.unresolved_requirements()
+    assert [r.label for r in unresolved] == ["CSE 4xx Electives"]
+    # Guarantee: no empty-course_keys requirement ever reaches the enumerator.
+    assert all(r.course_keys for r in profile.to_requirements())
