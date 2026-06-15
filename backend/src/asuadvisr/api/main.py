@@ -12,8 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from asuadvisr.llm.constraint_parser import ParsedConstraints, parse_constraints
-from asuadvisr.llm.dars_extractor import extract_profile
-from asuadvisr.llm.requirement_profile import RequirementProfile
+from asuadvisr.llm.requirement_extractor import RequirementProfile, extract_requirements
 from asuadvisr.pdf.extract import PdfExtractionError, extract_text_from_bytes
 from asuadvisr.scheduler.constraints import Day, ScheduleConstraints
 from asuadvisr.scheduler.enumerate import (
@@ -220,7 +219,7 @@ def schedule(req: ScheduleRequest) -> ScheduleResponse:
 
 
 @app.post("/extract-requirements", response_model=RequirementProfile)
-async def extract_requirements(file: Annotated[UploadFile, File()]) -> RequirementProfile:
+async def extract_requirements_endpoint(file: Annotated[UploadFile, File()]) -> RequirementProfile:
     """Extract a draft RequirementProfile from an uploaded DARS / major-map PDF.
 
     Stateless: returns the parsed profile for the user to review and confirm. The
@@ -232,6 +231,6 @@ async def extract_requirements(file: Annotated[UploadFile, File()]) -> Requireme
     except PdfExtractionError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     try:
-        return extract_profile(text)
+        return extract_requirements(text)
     except Exception as exc:  # LLM / upstream failure
         raise HTTPException(status_code=502, detail=str(exc)) from exc
