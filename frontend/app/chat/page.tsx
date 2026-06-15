@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { AuthGate } from "@/components/auth-gate";
+import { ScheduleCard } from "@/components/schedule-card";
 import { getSchedule, parseConstraints } from "@/lib/api";
 import {
   DAYS,
@@ -31,6 +32,9 @@ const MODE_LABELS: Record<string, string> = {
   ICOURSE: "iCourse",
 };
 
+/** Empty string means "Any" for the time-of-day select. */
+type TimeOfDay = "" | "morning" | "afternoon" | "evening";
+
 interface Constraints {
   avoid_days: Day[];
   earliest_start: string; // "HH:MM" or ""
@@ -38,6 +42,9 @@ interface Constraints {
   min_credits: string; // stored as string for number inputs
   max_credits: string;
   preferred_modality: string; // "" | "P" | "OL" | "HY"
+  only_open: boolean; // open-sections-only filter
+  compact_schedule: boolean; // soft pref: minimize gaps
+  prefer_time_of_day: TimeOfDay; // soft pref: "" (Any) | morning | afternoon | evening
 }
 
 function emptyConstraints(): Constraints {
@@ -48,6 +55,9 @@ function emptyConstraints(): Constraints {
     min_credits: "",
     max_credits: "",
     preferred_modality: "",
+    only_open: false,
+    compact_schedule: false,
+    prefer_time_of_day: "",
   };
 }
 
@@ -59,8 +69,17 @@ function toApiConstraints(c: Constraints): ApiConstraints {
     min_credits: c.min_credits !== "" ? Number(c.min_credits) : null,
     max_credits: c.max_credits !== "" ? Number(c.max_credits) : null,
     preferred_modality: c.preferred_modality || null,
+    only_open: c.only_open,
+    compact_schedule: c.compact_schedule,
+    prefer_time_of_day: c.prefer_time_of_day || null,
   };
 }
+
+const TIME_OF_DAY_LABELS: Record<Exclude<TimeOfDay, "">, string> = {
+  morning: "Morning",
+  afternoon: "Afternoon",
+  evening: "Evening",
+};
 
 function summaryChips(c: Constraints): string[] {
   const chips: string[] = [];
@@ -72,6 +91,9 @@ function summaryChips(c: Constraints): string[] {
   else if (c.min_credits) chips.push(`Min ${c.min_credits} credits`);
   else if (c.max_credits) chips.push(`Max ${c.max_credits} credits`);
   if (c.preferred_modality) chips.push(MODE_LABELS[c.preferred_modality] ?? c.preferred_modality);
+  if (c.only_open) chips.push("Open sections only");
+  if (c.compact_schedule) chips.push("Compact schedule");
+  if (c.prefer_time_of_day) chips.push(`${TIME_OF_DAY_LABELS[c.prefer_time_of_day]} classes`);
   return chips;
 }
 
@@ -140,6 +162,9 @@ function ChatFlow() {
         min_credits: parsed.min_credits != null ? String(parsed.min_credits) : "",
         max_credits: parsed.max_credits != null ? String(parsed.max_credits) : "",
         preferred_modality: parsed.preferred_modality ?? "",
+        only_open: parsed.only_open ?? false,
+        compact_schedule: parsed.compact_schedule ?? false,
+        prefer_time_of_day: (parsed.prefer_time_of_day ?? "") as TimeOfDay,
       });
       setStep("confirming");
       setShowEdit(false);
@@ -368,20 +393,65 @@ function ChatFlow() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="mb-1 block text-xs text-zinc-500">Modality</label>
-                  <select
-                    value={constraints.preferred_modality}
-                    onChange={(e) =>
-                      setConstraints((c) => ({ ...c, preferred_modality: e.target.value }))
-                    }
-                    className="rounded border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-600 dark:bg-zinc-900"
-                  >
-                    <option value="">Any</option>
-                    <option value="P">In Person</option>
-                    <option value="OL">Online</option>
-                    <option value="HY">Hybrid</option>
-                  </select>
+                <div className="flex flex-wrap gap-4">
+                  <div>
+                    <label className="mb-1 block text-xs text-zinc-500">Modality</label>
+                    <select
+                      value={constraints.preferred_modality}
+                      onChange={(e) =>
+                        setConstraints((c) => ({ ...c, preferred_modality: e.target.value }))
+                      }
+                      className="rounded border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-600 dark:bg-zinc-900"
+                    >
+                      <option value="">Any</option>
+                      <option value="P">In Person</option>
+                      <option value="OL">Online</option>
+                      <option value="HY">Hybrid</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-zinc-500">Preferred time of day</label>
+                    <select
+                      value={constraints.prefer_time_of_day}
+                      onChange={(e) =>
+                        setConstraints((c) => ({
+                          ...c,
+                          prefer_time_of_day: e.target.value as TimeOfDay,
+                        }))
+                      }
+                      className="rounded border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-600 dark:bg-zinc-900"
+                    >
+                      <option value="">Any</option>
+                      <option value="morning">Morning</option>
+                      <option value="afternoon">Afternoon</option>
+                      <option value="evening">Evening</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-300">
+                    <input
+                      type="checkbox"
+                      checked={constraints.only_open}
+                      onChange={(e) =>
+                        setConstraints((c) => ({ ...c, only_open: e.target.checked }))
+                      }
+                      className="h-3.5 w-3.5 rounded border-zinc-300 dark:border-zinc-600"
+                    />
+                    Only open sections
+                  </label>
+                  <label className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-300">
+                    <input
+                      type="checkbox"
+                      checked={constraints.compact_schedule}
+                      onChange={(e) =>
+                        setConstraints((c) => ({ ...c, compact_schedule: e.target.checked }))
+                      }
+                      className="h-3.5 w-3.5 rounded border-zinc-300 dark:border-zinc-600"
+                    />
+                    Compact schedule (minimize gaps)
+                  </label>
                 </div>
               </div>
             </section>
@@ -468,67 +538,6 @@ function ChatFlow() {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function ScheduleCard({ schedule, index }: { schedule: ScheduleOut; index: number }) {
-  const [copied, setCopied] = useState(false);
-
-  function copy() {
-    navigator.clipboard
-      .writeText(schedule.sections.map((s) => s.id).join(", "))
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      })
-      .catch(() => {});
-  }
-
-  return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
-      <div className="mb-3 flex items-center justify-between">
-        <span className="text-sm font-medium text-zinc-800 dark:text-zinc-100">
-          Schedule {index + 1}
-          <span className="ml-2 text-zinc-400">·</span>
-          <span className="ml-2 text-zinc-500">{schedule.total_credits} cr</span>
-        </span>
-        <button
-          type="button"
-          onClick={copy}
-          className="rounded px-2 py-1 text-xs text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800"
-        >
-          {copied ? "Copied!" : "Copy class #s"}
-        </button>
-      </div>
-      <table className="w-full text-xs">
-        <thead>
-          <tr className="text-left text-zinc-400">
-            <th className="pr-4 pb-1 font-medium">Class #</th>
-            <th className="pr-4 pb-1 font-medium">Course</th>
-            <th className="pr-4 pb-1 font-medium">Type</th>
-            <th className="pr-4 pb-1 font-medium">Mode</th>
-            <th className="pr-4 pb-1 font-medium">Days</th>
-            <th className="pb-1 font-medium">Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          {schedule.sections.map((sec) => (
-            <tr key={sec.id} className="border-t border-zinc-100 dark:border-zinc-800">
-              <td className="py-1 pr-4 font-mono text-zinc-500">{sec.id}</td>
-              <td className="py-1 pr-4 font-medium text-zinc-800 dark:text-zinc-100">
-                {sec.course_key}
-              </td>
-              <td className="py-1 pr-4 text-zinc-500">{sec.component}</td>
-              <td className="py-1 pr-4 text-zinc-500">
-                {MODE_LABELS[sec.instruction_mode] ?? sec.instruction_mode}
-              </td>
-              <td className="py-1 pr-4 text-zinc-500">{sec.days || "—"}</td>
-              <td className="py-1 text-zinc-500">{sec.time_range}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 }
