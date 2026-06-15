@@ -11,8 +11,24 @@ import type {
   ScheduleRequest,
   ScheduleResponse,
 } from "@/lib/api-types";
+import { getBrowserSupabase } from "@/lib/supabase";
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+/** Opportunistic auth: include `Authorization: Bearer <token>` when a Supabase
+ *  session exists, and nothing otherwise. SSR-safe (no session read on the
+ *  server) and failure-tolerant — anonymous calls (e.g. `getCourses`) keep
+ *  working since the backend does not verify JWTs. */
+async function authHeader(): Promise<Record<string, string>> {
+  if (typeof window === "undefined") return {};
+  try {
+    const { data } = await getBrowserSupabase().auth.getSession();
+    const token = data.session?.access_token;
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  } catch {
+    return {};
+  }
+}
 
 /** Thrown for any non-OK response or network failure. `status` is 0 when the
  *  request never reached the server (e.g. backend down, CORS, offline). */
@@ -34,6 +50,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       headers: {
         // Only send a JSON content-type when there's a body to describe.
         ...(init?.body ? { "Content-Type": "application/json" } : {}),
+        // Attach the bearer token when signed in; harmless when anonymous.
+        ...(await authHeader()),
         ...init?.headers,
       },
     });
