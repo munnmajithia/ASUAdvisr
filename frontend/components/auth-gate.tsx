@@ -22,9 +22,16 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!supabase) return;
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setAuth(session ? { status: "signed_in", session } : { status: "signed_out" });
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setAuth(session ? { status: "signed_in", session } : { status: "signed_out" });
+      })
+      .catch((err: unknown) => {
+        // Don't get stuck on "Loading…" — fall back to the sign-in form and surface why.
+        setError(err instanceof Error ? err.message : "Couldn’t check your session. Please sign in.");
+        setAuth({ status: "signed_out" });
+      });
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
