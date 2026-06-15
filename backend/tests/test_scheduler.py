@@ -57,6 +57,7 @@ def _section(
     component: str = "LEC",
     units: float = 3.0,
     slots: list[MeetingSlot] | None = None,
+    enrl_stat: str = "O",
 ) -> SectionNode:
     return SectionNode(
         id=id_,
@@ -65,7 +66,7 @@ def _section(
         ssr_count=1,
         component=component,
         instruction_mode="P",
-        enrl_stat="O",
+        enrl_stat=enrl_stat,
         units=units,
         meeting_slots=slots or [],
     )
@@ -296,3 +297,21 @@ def test_credit_constraint_filters(sections: dict[str, list[SectionNode]]) -> No
     )
     for r in results:
         assert r.total_credits == pytest.approx(3.0)
+
+
+def test_only_open_excludes_closed_sections() -> None:
+    open_sec = _section(1, "CSE 101", assoc="1", slots=[_slot("MWF", "09:00", "09:50")])
+    closed_sec = _section(
+        2, "CSE 101", assoc="2", enrl_stat="C", slots=[_slot("TR", "09:00", "09:50")]
+    )
+    by_course = {"CSE 101": [open_sec, closed_sec]}
+    req = [CourseRequirement(course_keys=["CSE 101"], pick=1)]
+
+    all_results = enumerate_schedules(req, by_course, ScheduleConstraints(), max_results=50)
+    open_only = enumerate_schedules(
+        req, by_course, ScheduleConstraints(only_open=True), max_results=50
+    )
+
+    assert len(all_results) == 2  # both sections schedulable by default
+    assert len(open_only) == 1  # closed section filtered out
+    assert open_only[0].section_ids == [1]

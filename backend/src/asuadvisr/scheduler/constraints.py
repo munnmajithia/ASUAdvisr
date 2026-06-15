@@ -31,6 +31,7 @@ class ScheduleConstraints:
     min_credits: float | None = None
     max_credits: float | None = None
     preferred_modality: str | None = None  # 'P', 'OL', 'HY'
+    only_open: bool = False  # drop sections whose enrl_stat != 'O'
 
 
 def has_conflict(a: MeetingSlot, b: MeetingSlot) -> bool:
