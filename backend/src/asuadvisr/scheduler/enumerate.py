@@ -42,6 +42,7 @@ class SectionNode:
     enrl_stat: str
     units: float
     meeting_slots: list[MeetingSlot] = field(default_factory=list)
+    instructors: list[str] = field(default_factory=list)  # display names, e.g. 'Jane Doe'
 
 
 @dataclass
@@ -119,6 +120,8 @@ def load_sections_from_fixture(path: Path) -> dict[str, list[SectionNode]]:
             for mt in parsed["meeting_times"]
         ]
 
+        instructors = [f"{i['first_name']} {i['last_name']}".strip() for i in parsed["instructors"]]
+
         node = SectionNode(
             id=parsed["section"]["id"],
             course_key=key,
@@ -129,6 +132,7 @@ def load_sections_from_fixture(path: Path) -> dict[str, list[SectionNode]]:
             enrl_stat=parsed["section"]["enrl_stat"],
             units=float(clas["UNITSMINIMUM"]),
             meeting_slots=slots,
+            instructors=instructors,
         )
         by_course.setdefault(key, []).append(node)
 

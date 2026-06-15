@@ -91,6 +91,7 @@ class SectionDetail(BaseModel):
     time_range: str  # e.g. "9:00 AM - 9:50 AM" or "Async"
     enrl_stat: str  # 'O' open, 'C' closed, 'W' waitlist, 'X'
     is_open: bool  # convenience flag: enrl_stat == 'O'
+    instructors: list[str]  # display names, e.g. ['Jane Doe']
 
 
 class ScheduleOut(BaseModel):
@@ -132,6 +133,7 @@ def _section_detail(node: SectionNode) -> SectionDetail:
             time_range="Async",
             enrl_stat=node.enrl_stat,
             is_open=node.enrl_stat == "O",
+            instructors=node.instructors,
         )
     slot = node.meeting_slots[0]
     days = "".join(abbr for attr, abbr in day_chars if getattr(slot, attr))
@@ -150,6 +152,7 @@ def _section_detail(node: SectionNode) -> SectionDetail:
         time_range=time_range,
         enrl_stat=node.enrl_stat,
         is_open=node.enrl_stat == "O",
+        instructors=node.instructors,
     )
 
 

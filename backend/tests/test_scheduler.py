@@ -171,6 +171,13 @@ def test_fixture_loads_courses(sections: dict[str, list[SectionNode]]) -> None:
     assert len(sections["CSE 100"]) > 0
 
 
+def test_fixture_sections_carry_instructors(sections: dict[str, list[SectionNode]]) -> None:
+    all_nodes = [node for nodes in sections.values() for node in nodes]
+    # Instructor lists are always present (possibly empty); some sections name a real instructor.
+    assert all(isinstance(node.instructors, list) for node in all_nodes)
+    assert any(node.instructors for node in all_nodes), "expected some sections to list instructors"
+
+
 def test_single_required_course_returns_schedules(
     sections: dict[str, list[SectionNode]],
 ) -> None:

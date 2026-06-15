@@ -36,6 +36,7 @@ def test_schedule_response_includes_seat_status() -> None:
             assert section.enrl_stat  # populated, e.g. 'O'/'C'
             assert isinstance(section.is_open, bool)
             assert section.is_open == (section.enrl_stat == "O")
+            assert isinstance(section.instructors, list)  # may be empty for some sections
             return
     pytest.skip("no schedulable course found in first 10 fixture courses")
 
