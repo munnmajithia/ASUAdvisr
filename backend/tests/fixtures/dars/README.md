@@ -14,8 +14,9 @@ Science student (Tempe, 2023–24 catalog) — i.e. ASU's current DARS.
 | `dars_sanitized.pdf` | Yes | PII-free PDF, regenerated from redacted text. The fixture tests load this. |
 | `dars_sanitized.txt` | Yes | Text PyMuPDF extracts from `dars_sanitized.pdf` — human-readable reference + regression lock. |
 
-`.gitignore` ignores **every** PDF in this directory by default and allows only
-`dars_sanitized.pdf`, so a carelessly-dropped real audit can't be committed.
+`.gitignore` ignores **every** file in this directory by default and allowlists
+only `README.md` + the two `dars_sanitized.*` files, so a carelessly-dropped real
+audit — any name or format (`.pdf`, `.txt`, …) — can't be committed.
 
 ## PII handling
 

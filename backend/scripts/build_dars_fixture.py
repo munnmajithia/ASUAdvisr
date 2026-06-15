@@ -34,8 +34,9 @@ _SUBSTITUTIONS = [
     ("Munn Majithia", "Test Student"),
     ("1230356233", "0000000000"),
 ]
-# The audit-results URL embeds a per-session/job token; collapse it.
-_URL_TOKEN = re.compile(r"JobQueueRun!!!![A-Za-z0-9+/=]+")
+# The audit-results URL embeds a per-session/job token; collapse it. The class
+# covers both standard (+/) and URL-safe (-_) base64 so no token tail survives.
+_URL_TOKEN = re.compile(r"JobQueueRun!!!![A-Za-z0-9+/=_-]+")
 
 # Strings that must never appear in committed output (defence-in-depth).
 _FORBIDDEN = ["Munn", "Majithia", "1230356233", "ISEhIWludFNlcU5vPTE2OTAzNTcxMQ"]
@@ -48,6 +49,9 @@ _BOX = fitz.Rect(_MARGIN, _MARGIN, _PAGE.width - _MARGIN, _PAGE.height - _MARGIN
 _FONT = "cour"
 _FONTSIZE = 7.0
 _LINES_PER_PAGE = 75
+# Courier advances ~0.6em/char; lines wider than the box wrap silently (the
+# vertical-overflow check below can't see it), corrupting the text round-trip.
+_MAX_LINE_CHARS = int(_BOX.width / (_FONTSIZE * 0.6))
 
 
 def sanitize(text: str) -> str:
@@ -58,6 +62,12 @@ def sanitize(text: str) -> str:
 
 
 def _build_pdf(lines: list[str]) -> fitz.Document:
+    for n, line in enumerate(lines):
+        if len(line) > _MAX_LINE_CHARS:
+            raise RuntimeError(
+                f"line {n} is {len(line)} chars (> {_MAX_LINE_CHARS}); it would "
+                f"word-wrap and corrupt the text round-trip: {line[:50]!r}"
+            )
     doc = fitz.open()
     for start in range(0, len(lines), _LINES_PER_PAGE):
         chunk = "\n".join(lines[start : start + _LINES_PER_PAGE])
@@ -76,6 +86,8 @@ def main() -> int:
         print(f"missing {REAL_PDF} — drop your real audit PDF there first", file=sys.stderr)
         return 1
 
+    # Mirrors asuadvisr.llm.requirement_extractor.extract_text (kept inline so this
+    # dev script has no dependency on the package being installed on sys.path).
     with fitz.open(REAL_PDF) as src:
         raw = "".join(page.get_text() for page in src)
     sanitized = sanitize(raw)

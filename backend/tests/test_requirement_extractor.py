@@ -167,3 +167,29 @@ def test_tool_choice_forced_and_model() -> None:
     kwargs = client.messages.create.call_args.kwargs
     assert kwargs["tool_choice"] == {"type": "tool", "name": "extract_requirements"}
     assert kwargs["model"] == "claude-opus-4-8"
+
+
+def test_no_tool_use_block_raises() -> None:
+    # A refusal can leave the response with no tool_use block despite forced
+    # tool_choice — fail loudly, not with a bare StopIteration.
+    text_block = MagicMock()
+    text_block.type = "text"
+    response = MagicMock()
+    response.content = [text_block]
+    response.stop_reason = "refusal"
+    client = MagicMock()
+    client.messages.create.return_value = response
+
+    with pytest.raises(RuntimeError, match="no tool_use block"):
+        extract_requirements("...", client=client)
+
+
+def test_truncated_extraction_raises() -> None:
+    response = MagicMock()
+    response.stop_reason = "max_tokens"
+    response.content = []
+    client = MagicMock()
+    client.messages.create.return_value = response
+
+    with pytest.raises(RuntimeError, match="truncated"):
+        extract_requirements("...", client=client)

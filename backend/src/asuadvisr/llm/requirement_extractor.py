@@ -175,7 +175,18 @@ def extract_requirements(
         messages=[{"role": "user", "content": text}],
     )
 
-    tool_use_block = next(b for b in response.content if b.type == "tool_use")
+    if response.stop_reason == "max_tokens":
+        raise RuntimeError(
+            "extraction truncated at max_tokens before the profile was complete; raise max_tokens"
+        )
+    tool_use_block = next((b for b in response.content if b.type == "tool_use"), None)
+    if tool_use_block is None:
+        # Forced tool_choice normally guarantees a tool_use block; a refusal or
+        # other early stop can still produce none. Fail loudly, not with a bare
+        # StopIteration.
+        raise RuntimeError(
+            f"extraction returned no tool_use block (stop_reason={response.stop_reason!r})"
+        )
     return RequirementProfile.model_validate(tool_use_block.input)
 
 
