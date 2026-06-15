@@ -21,6 +21,9 @@ export interface ApiConstraints {
   min_credits: number | null;
   max_credits: number | null;
   preferred_modality: string | null; // "P" | "OL" | "HY" | …
+  only_open: boolean; // open-sections-only filter
+  compact_schedule: boolean; // soft pref: minimize gaps
+  prefer_time_of_day: string | null; // soft pref: "morning" | "afternoon" | "evening"
 }
 
 /** Response of `POST /parse-constraints` — same shape as a constraints input. */
@@ -47,6 +50,9 @@ export interface SectionDetail {
   instruction_mode: string;
   days: string; // e.g. "MWF"
   time_range: string; // e.g. "9:00 AM - 9:50 AM" or "Async"
+  enrl_stat: string; // 'O' open, 'C' closed, 'W' waitlist, 'X'
+  is_open: boolean; // convenience flag: enrl_stat === 'O'
+  instructors: string[]; // display names, e.g. ['Jane Doe']
 }
 
 /** Matches `ScheduleOut`. */
