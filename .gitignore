@@ -49,3 +49,11 @@ next-env.d.ts
 # Coverage
 coverage/
 .nyc_output/
+
+# DARS fixtures contain student PII (name, ASU ID). Ignore EVERYTHING in this
+# directory by default so a carelessly-dropped real audit (any name or format)
+# can't be committed; allow only the sanitized, PII-free derivatives + docs.
+backend/tests/fixtures/dars/*
+!backend/tests/fixtures/dars/README.md
+!backend/tests/fixtures/dars/dars_sanitized.pdf
+!backend/tests/fixtures/dars/dars_sanitized.txt
