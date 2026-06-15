@@ -3,11 +3,9 @@
 import { useEffect, useState } from "react";
 
 import { AuthGate } from "@/components/auth-gate";
+import { getCourses, getSchedule, parseConstraints } from "@/lib/api";
+import { DAYS, type ApiConstraints, type Day, type ScheduleOut } from "@/lib/api-types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
-const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
-type Day = (typeof DAYS)[number];
 const DAY_LABELS: Record<Day, string> = {
   mon: "Mon",
   tue: "Tue",
@@ -34,20 +32,6 @@ interface Constraints {
   preferred_modality: string; // "" | "P" | "OL" | "HY"
 }
 
-interface SectionDetail {
-  id: number;
-  course_key: string;
-  component: string;
-  instruction_mode: string;
-  days: string;
-  time_range: string;
-}
-
-interface ScheduleOut {
-  sections: SectionDetail[];
-  total_credits: number;
-}
-
 function emptyConstraints(): Constraints {
   return {
     avoid_days: [],
@@ -59,7 +43,7 @@ function emptyConstraints(): Constraints {
   };
 }
 
-function toApiConstraints(c: Constraints) {
+function toApiConstraints(c: Constraints): ApiConstraints {
   return {
     avoid_days: c.avoid_days,
     earliest_start: c.earliest_start || null,
@@ -106,9 +90,8 @@ function ChatFlow() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${API_BASE}/courses`)
-      .then((r) => r.json())
-      .then((data: { courses: string[] }) => setAllCourses(data.courses))
+    getCourses()
+      .then(setAllCourses)
       .catch(() => {});
   }, []);
 
@@ -118,20 +101,14 @@ function ChatFlow() {
     setParsing(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/parse-constraints`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: chatText }),
-      });
-      if (!res.ok) throw new Error(`API error ${res.status}`);
-      const data = await res.json();
+      const parsed = await parseConstraints(chatText);
       setConstraints({
-        avoid_days: (data.avoid_days as Day[]) ?? [],
-        earliest_start: (data.earliest_start as string) ?? "",
-        latest_end: (data.latest_end as string) ?? "",
-        min_credits: data.min_credits != null ? String(data.min_credits) : "",
-        max_credits: data.max_credits != null ? String(data.max_credits) : "",
-        preferred_modality: (data.preferred_modality as string) ?? "",
+        avoid_days: parsed.avoid_days,
+        earliest_start: parsed.earliest_start ?? "",
+        latest_end: parsed.latest_end ?? "",
+        min_credits: parsed.min_credits != null ? String(parsed.min_credits) : "",
+        max_credits: parsed.max_credits != null ? String(parsed.max_credits) : "",
+        preferred_modality: parsed.preferred_modality ?? "",
       });
       setStep("confirming");
       setShowEdit(false);
@@ -148,18 +125,12 @@ function ChatFlow() {
     setScheduling(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/schedule`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          requirements: [...selected].map((key) => ({ course_keys: [key], pick: 1 })),
-          constraints: toApiConstraints(constraints),
-          max_results: 50,
-        }),
+      const data = await getSchedule({
+        requirements: [...selected].map((key) => ({ course_keys: [key], pick: 1 })),
+        constraints: toApiConstraints(constraints),
+        max_results: 50,
       });
-      if (!res.ok) throw new Error(`API error ${res.status}`);
-      const data = await res.json();
-      setSchedules((data as { schedules: ScheduleOut[] }).schedules);
+      setSchedules(data.schedules);
       setStep("results");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Schedule failed");

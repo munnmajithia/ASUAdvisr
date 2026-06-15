@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+import { getCourses, getSchedule } from "@/lib/api";
+import { DAYS, type ApiConstraints, type Day, type ScheduleOut } from "@/lib/api-types";
 
-const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
-type Day = (typeof DAYS)[number];
 const DAY_LABELS: Record<Day, string> = {
   mon: "Mon",
   tue: "Tue",
@@ -15,25 +14,6 @@ const DAY_LABELS: Record<Day, string> = {
   sat: "Sat",
   sun: "Sun",
 };
-
-interface SectionDetail {
-  id: number;
-  course_key: string;
-  component: string;
-  instruction_mode: string;
-  days: string;
-  time_range: string;
-}
-
-interface ScheduleOut {
-  sections: SectionDetail[];
-  total_credits: number;
-}
-
-interface ScheduleResponse {
-  schedules: ScheduleOut[];
-  count: number;
-}
 
 const MODE_LABELS: Record<string, string> = {
   P: "In Person",
@@ -53,10 +33,9 @@ export default function SchedulePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${API_BASE}/courses`)
-      .then((r) => r.json())
-      .then((data: { courses: string[] }) => setAllCourses(data.courses))
-      .catch(() => setError("Could not reach the API. Is the backend running?"));
+    getCourses()
+      .then(setAllCourses)
+      .catch((err) => setError(err instanceof Error ? err.message : "Could not load courses."));
   }, []);
 
   function toggleCourse(key: string) {
@@ -82,22 +61,19 @@ export default function SchedulePage() {
     setError(null);
     setResults(null);
     try {
-      const body = {
-        requirements: [...selected].map((key) => ({ course_keys: [key], pick: 1 })),
-        constraints: {
-          avoid_days: [...avoidDays],
-          earliest_start: earliestStart || null,
-          latest_end: latestEnd || null,
-        },
-        max_results: 50,
+      const constraints: ApiConstraints = {
+        avoid_days: [...avoidDays],
+        earliest_start: earliestStart || null,
+        latest_end: latestEnd || null,
+        min_credits: null,
+        max_credits: null,
+        preferred_modality: null,
       };
-      const res = await fetch(`${API_BASE}/schedule`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+      const data = await getSchedule({
+        requirements: [...selected].map((key) => ({ course_keys: [key], pick: 1 })),
+        constraints,
+        max_results: 50,
       });
-      if (!res.ok) throw new Error(`API error ${res.status}`);
-      const data: ScheduleResponse = await res.json();
       setResults(data.schedules);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
