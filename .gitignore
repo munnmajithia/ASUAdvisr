@@ -49,3 +49,10 @@ next-env.d.ts
 # Coverage
 coverage/
 .nyc_output/
+
+# DARS fixtures contain student PII (name, ASU ID) — keep raw copies local only.
+# Ignore every audit PDF by default so a carelessly-dropped real one can't be
+# committed; allow only the explicitly sanitized derivative.
+backend/tests/fixtures/dars/*.pdf
+backend/tests/fixtures/dars/*.raw.txt
+!backend/tests/fixtures/dars/dars_sanitized.pdf

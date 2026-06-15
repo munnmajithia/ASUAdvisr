@@ -1,0 +1,897 @@
+Request Audit
+ Open All Sections
+ Close All Sections
+ Printer Friendly
+Full Requirements Degree Audit
+Logon to My ASU to request your degree audit
+Your official major/catalog year on file is:
+Computer Science, Tempe, 1996/Online, 20231 For 23-24 CATALOG
+-----------------------------------------------------------------
+>>>>> AT LEAST ONE REQUIREMENT HAS NOT BEEN SATISFIED
+Major Verification
+This audit matches your declared major
+ASU Catalog Year Verification
+This audit matches your approved catalog: 2023-24.
+OPT
+DUPLICATE OR REPEATED COURSES may need processing by the
+Registrar.
+Credit may be removed for duplicate or repeated courses
+that will affect credit totals such as total hours
+completed. Processing does not occur until the end of the
+term. Courses with '*' or '@' are already processed.
+See grading policies, including policies related to course
+repeat limitation here:
+Repeat Policy
+Courses in-progress of duplicating or repeating credit:
+IP
+SU26
+M CSE 301
+1.00
+NR
+>R
+COMPUTING ETHICS
+SU26
+M CSE 360
+3.00
+NR
+>R
+INTRO TO SOFTWARE ENGINEERING
+Duplicate or Repeat ASU courses marked in PeopleSoft:
+SP24
+M ENG 105
+3.00
+B-
+ADV FIRST-YEAR COMPOSITION
+SP26
+M CSE 230
+3.00
+A
+COMPUTER ORG/ASSEMB LANG PROG
+Duplicated or Repeated courses still carrying credit:
+SP25
+M CSE 301
+1.00
+D
+>R
+COMPUTING ETHICS
+FA25
+M CSE 360
+3.00
+D
+>R
+INTRO TO SOFTWARE ENGINEERING
+Duplicated or Repeated ASU courses with credit removed:
+FA23
+D ENG 105
+0.00
+EU*
+ADV FIRST-YEAR COMPOSITION
+FA25
+M CSE 230
+0.00
+D*
+COMPUTER ORG/ASSEMB LANG PROG
+OPT
+IN PROGRESS COURSES
+These courses are currently in progress:
+IP
+SU26
+M CSE 301
+1.00
+NR
+>R
+COMPUTING ETHICS
+SU26
+M CSE 330
+3.00
+NR
+>>
+OPERATING SYSTEMS
+SU26
+M CSE 340
+3.00
+NR
+>>
+PRINCIPLES OF PROGRAMMING LAN
+SU26
+M CSE 360
+3.00
+NR
+>R
+INTRO TO SOFTWARE ENGINEERING
+University Graduation Requirements such as Total Hours,
+Upper Division and GPA checks may vary with college, school
+or major. Refer to specific graduation requirements for
+your college, school or major.
+OPT
+Credit By Exam and Military Credit 60-Hour Maximum
+Credit By Exam and Military Credit hours:
+60 hours Maximum.
+7.00 Hours Earned
+1)
+OPT
+Two-Year Institution 64 Hour Maximum
+Test Student
+BS COMPUTER SCIENCE
+IRA A. FULTON SCHOOLS OF ENGINEERING
+Audit Results
+Prepared On
+06/15/2026 12:37 PM
+Program Code
+ES CSE BS
+Catalog Year
+Fall 2023
+Student ID
+0000000000
+ Legend
+uAchieve Self-Service
+6/15/26, 3:38 PM
+My Audit - Audit Results Tab
+https://webapp4.asu.edu/uachieve/audit/read.html?id=JobQueueRun!!!!REDACTED
+1/8
+TOTAL HOURS: 120 hours minimum
+TOTAL HOURS: 120 hours minimum
+No more than 64 hours from two-year institutions
+may be applied toward minimum total hours.
+77.00 Hours Earned
+NEEDS:
+33.00 HOURS
+IP
+1)
+UPPER DIVISION: 45 Hours Minimum
+Upper Division - 45 hours
+13.00 Hours Earned
+NEEDS:
+22.00 HOURS
+IP
+RESIDENT CREDIT: 30 hours at ASU
+Resident ASU hours: 30 hours
+70.00 Hours Earned
+IP
+ASU GPA - courses taken at ASU
+2.00 minimum required
+EARNED:
+70.00  HOURS
+2.94 GPA
+Graduation With Academic Recognition
+3.40 - 3.59 Cum Laude
+3.60 - 3.79 Magna Cum Laude
+3.80 - 4.00 Summa Cum Laude
+ASU 101 or college-specific equivalent First-Year Seminar
+is required for all first-year students.
+The ASU Experience
+ASU 101 - The ASU Experience: 1 hour
+1)
+FA23
+M ASU 101-CAI
+1.00
+D
+THE ASU EXPERIENCE
+University Requirement
+FIRST-YEAR COMPOSITION
+Students must complete ENG 101 and ENG 102; or ENG 107 and
+ENG 108; or ENG 105.
+ENG 105
+ENG 105: 3 hours, C minimum
+1 Course
+1)
+SP24
+M ENG 105
+3.00
+B-
+ADV FIRST-YEAR COMPOSITION
+EARNED:
+1 SUB-GROUP
+ATTENTION!
+Check the requirements of your college or school,
+and major, before choosing your university general
+studies courses. Many college, school, and major
+requirements may also satisfy university general
+studies requirements.
+University General Studies Requirement - Maroon
+LITERACY AND CRITICAL INQUIRY (UPPER)
+****************************************
+CLEP credit does not satisfy the Literacy and Critical
+Inquiry (L) requirement
+Upper Division Literacy and Critical Inquiry (L):
+3 hours
+NEEDS:
+3.00 HOURS
+1 SET
+1)
+University General Studies Requirement - Maroon
+LITERACY AND CRITICAL INQUIRY (UPPER or LOWER)
+*******************************************************
+CLEP credit does not satisfy the Literacy and Critical
+Inquiry (L) requirement
+IN-PROG>
+10.00 HOURS
+IN-PROG>
+10.00 HOURS
+IN-PROG>
+10.00 HOURS
+uAchieve Self-Service
+6/15/26, 3:38 PM
+My Audit - Audit Results Tab
+https://webapp4.asu.edu/uachieve/audit/read.html?id=JobQueueRun!!!!REDACTED
+2/8
+Literacy and Critical Inquiry (L): 3 hours
+NEEDS:
+3.00 HOURS
+1 SET
+1)
+University General Studies Requirement - Maroon
+MATHEMATICAL STUDIES
+Mathematics (MA): 3 hours
+4.00 Hours Earned
+1)
+SU23
+MAT 270
+4.00
+AP
+CALCULUS W/ANALYTIC GEOMETRY
+University General Studies Requirement - Maroon
+COMPUTER/STATISTICS/QUANTITATIVE APPLICATIONS
+Computer/Statistics/Quantitative Applications (CS):
+3 hours
+3.00 Hours Earned
+1 Course
+1)
+FA23
+M CSE 110
+3.00
+B
+PRINCIPLES OF PROGRAMMING
+University General Studies Requirement - Maroon
+HUMANITIES, ARTS AND DESIGN or
+SOCIAL - BEHAVIORAL SCIENCES (UPPER)
+Upper Division Humanities, Arts and Design (HU): 3
+hours OR Upper Division Social - Behavioral
+Sciences (SB): 3 hours
+NEEDS:
+3.00 HOURS
+1)
+University General Studies Requirement - Maroon
+HUMANITIES, ARTS AND DESIGN
+Humanities, Arts and Design (HU): 6 hours
+6.00 Hours Earned
+1)
+FA23
+M REL 100
+3.00
+B
+RELIGIONS OF THE WORLD
+FA24
+W PHI 105
+3.00
+A+
+INTRO TO ETHICS
+EARNED:
+6.00  HOURS
+University General Studies Requirement - Maroon
+SOCIAL - BEHAVIORAL SCIENCES
+Social - Behavioral Sciences (SB): 6 hours
+6.00 Hours Earned
+FA23
+M SGS 101
+3.00
+C+
+THINKING GLOBALLY
+SP24
+M GCU 113
+3.00
+A+
+US AND AZ SOCIAL STUDIES
+EARNED:
+6.00  HOURS
+University General Studies Requirement - Maroon
+NATURAL SCIENCES (QUANTITATIVE)
+Natural Science - Quantitative (SQ): 4 hours
+4.00 Hours Earned
+1)
+SP24
+M PHY 121
+3.00
+A-
+UNIV PHYSICS I: MECHANICS
+SP24
+M PHY 122
+1.00
+A-
+UNIVERSITY PHYSICS LAB I
+EARNED:
+4.00  HOURS
+1 SUB-GROUP
+University General Studies Requirement - Maroon
+NATURAL SCIENCES (QUANTITATIVE or GENERAL)
+Natural Science - Quantitative (SQ) OR Natural Science
+- General (SG): 4 hours
+4.00 Hours Earned
+1)
+FA24
+M PHY 131
+3.00
+A-
+UNIV PHYSICS II: ELCTRC/MAGNE
+FA24
+M PHY 132
+1.00
+B-
+UNIVERSITY PHYSICS LAB II
+EARNED:
+4.00  HOURS
+1 SUB-GROUP
+University General Studies Requirement - Maroon
+AWARENESS AREAS
+All three areas required.
+Complete Cultural Diversity in the U.S.(C)
+NEEDS:
+1 COURSE
+1)
+Global Awareness (G)
+1 Course
+2)
+FA23
+M REL 100
+3.00
+B
+RELIGIONS OF THE WORLD
+EARNED:
+2 SUB-GROUPS
+NEEDS:
+1 SUB-GROUP
+uAchieve Self-Service
+6/15/26, 3:38 PM
+My Audit - Audit Results Tab
+https://webapp4.asu.edu/uachieve/audit/read.html?id=JobQueueRun!!!!REDACTED
+3/8
+Historical Awareness (H)
+1 Course
+3)
+SP24
+M GCU 113
+3.00
+A+
+US AND AZ SOCIAL STUDIES
+Computer Science (Lab Science)Lower Division: 12 hours
+Lab Science: 12 hours
+Must take 8 hours (SQ) from one subject area
+and 4 hours (SQ) from a different subject area
+12.00 Hours Earned
+3 SETS TAKEN
+1)
+SP24
+M PHY 121
+3.00
+A-
+UNIV PHYSICS I: MECHANICS
+SP24
+M PHY 122
+1.00
+A-
+UNIVERSITY PHYSICS LAB I
+FA24
+M PHY 131
+3.00
+A-
+UNIV PHYSICS II: ELCTRC/MAGNE
+FA24
+M PHY 132
+1.00
+B-
+UNIVERSITY PHYSICS LAB II
+SP25
+M GPH 111
+3.00
+A+
+INTRO TO PHYSICAL GEOGRAPHY
+SP25
+M GPH 112
+1.00
+A+
+INTRO TO PHYS GEOGRAPHY LAB
+EARNED:
+12.00  HOURS
+1 SUB-GROUP
+Computer Science (Mathematics) Lower Division: 12 hours
+MAT 243: 3 hours, C minimum
+3.00 Hours Earned
+1)
+FA24
+M MAT 243
+3.00
+B+
+DISCRETE MATH STRUCTURES
+MAT 265 (MA): 3 hours, C minimum
+4.00 Hours Earned
+2)
+SU23
+MAT 270
+4.00
+AP
+CALCULUS W/ANALYTIC GEOMETRY
+MAT 266 (MA): 3 hours, C minimum
+3.00 Hours Earned
+3)
+FA23
+M MAT 266
+3.00
+B
+CALCULUS FOR ENGINEERS II
+MAT 267 (MA) OR CSE 259 OR MAT 275 (MA): 3 hours
+C minimum
+3.00 Hours Earned
+4)
+SP24
+M MAT 267
+3.00
+B
+CALCULUS FOR ENGINEERS III
+EARNED:
+13.00  HOURS
+4 SUB-GROUPS
+Computer Science Lower Division: 17 hours
+**********************************************************
+NOTE:COURSES IN THIS SECTION CANNOT BE USED TOWARD A MINOR
+**********************************************************
+CSE 110 (CS): 3 hours, C minimum
+3.00 Hours Earned
+3.00 GPA
+1)
+FA23
+M CSE 110
+3.00
+B
+PRINCIPLES OF PROGRAMMING
+CSE 120: 3 hours, C minimum
+3.00 Hours Earned
+2.00 GPA
+2)
+SP25
+M EEE 120
+3.00
+C
+DIGITAL DESIGN FUNDAMENTALS
+CSE 205 (CS): 3 hours, C minimum
+3.00 Hours Earned
+4.00 GPA
+3)
+SP24
+M CSE 205
+3.00
+A
+OBJECT-ORIENTED PROGRAM & DAT
+CSE 230: 3 hours, C minimum
+3.00 Hours Earned
+4.00 GPA
+4)
+SP26
+M CSE 230
+3.00
+A
+COMPUTER ORG/ASSEMB LANG PROG
+CSE 240: 3 hours, C minimum
+3.00 Hours Earned
+3.67 GPA
+5)
+FA24
+M CSE 240
+3.00
+A-
+INTRO TO PROGRAMMING LANGUAGE
+FSE 100: 2 hours, C minimum
+2.00 Hours Earned
+4.00 GPA
+6)
+FA23
+M FSE 100
+2.00
+A
+INTRODUCTION TO ENGINEERING
+EARNED:
+17.00  HOURS
+6 SUB-GROUPS
+Computer Science Upper Division: 31 hours
+*********************************************************
+NOTE:COURSES IN THIS SECTION CANNOT BE USED TOWARD A MINOR
+*********************************************************
+EARNED:
+6.00  HOURS
+6 SUB-GROUPS
+IN-PROG>
+10.00  HOURS
+NEEDS:
+15.00  HOURS
+5 SUB-GROUPS
+uAchieve Self-Service
+6/15/26, 3:38 PM
+My Audit - Audit Results Tab
+https://webapp4.asu.edu/uachieve/audit/read.html?id=JobQueueRun!!!!REDACTED
+4/8
+CSE 301: 1 hour, C minimum
+0.00 Hours Earned
+IP
+1)
+SU26
+M CSE 301
+1.00
+NR
+>R
+COMPUTING ETHICS
+CSE 310: 3 hours, C minimum
+3.00 Hours Earned
+2.00 GPA
+2)
+SP25
+M CSE 310
+3.00
+C
+DATA STRUCTURES AND ALGORITHM
+CSE 330: 3 hours, C minimum
+0.00 Hours Earned
+IP
+3)
+SU26
+M CSE 330
+3.00
+NR
+>>
+OPERATING SYSTEMS
+CSE 340: 3 hours, C minimum
+0.00 Hours Earned
+IP
+4)
+SU26
+M CSE 340
+3.00
+NR
+>>
+PRINCIPLES OF PROGRAMMING LAN
+CSE 355: 3 hours, C minimum
+NEEDS:
+3.00 HOURS
+COURSE LIST:
+CSE 355
+5)
+CSE 360: 3 hours, C minimum
+0.00 Hours Earned
+IP
+6)
+SU26
+M CSE 360
+3.00
+NR
+>R
+INTRO TO SOFTWARE ENGINEERING
+CSE 365: 3 hours, C minimum
+NEEDS:
+3.00 HOURS
+COURSE LIST:
+CSE 365
+7)
+CSE 485 (L): 3 hours, C minimum
+NEEDS:
+3.00 HOURS
+COURSE LIST:
+CSE 485
+8)
+CSE 486 (L): 3 hours, C minimum
+NEEDS:
+3.00 HOURS
+COURSE LIST:
+CSE 486
+9)
+IEE 380 (CS): 3 hours, C minimum
+3.00 Hours Earned
+ 10)
+FA25
+M IEE 380
+3.00
+A
+PROB & STATS ENGR PROB SOLVIN
+MAT 343: 3 hours, C minimum
+NEEDS:
+3.00 HOURS
+COURSE LIST:
+MAT 343
+ 11)
+BS COMPUTER SCIENCE ELECTIVES
+**********************************************************
+NOTE:COURSES IN THIS SECTION CANNOT BE USED TOWARD A MINOR
+**********************************************************
+1. Students can apply up to 3 total hours of FSE 301 or
+CSE 484 and FSE 404.
+2. FSE 301 or CSE 484, 492, 493, 499, 404 total of 6
+maximum hours can apply to degree.
+3. Students can apply FSE 301 or CSE 484 but not both.
+4. Students can apply DAT 402 or CSE 475 but not both.
+**********************************************************
+CSE 412 OR CSE 434 OR CSE 445: 3 hours, C minimum
+NEEDS:
+3.00 HOURS
+COURSE LIST:
+CSE 412 OR CSE 434 OR CSE 445
+1)
+CSE 4** Electives: 12 hours, C minimum.
+NEEDS:
+12.00 HOURS
+COURSE LIST:
+CSE 4
+2)
+EARNED:
+3.00  HOURS
+0 SUB-GROUPS
+NEEDS:
+18.00  HOURS
+3 SUB-GROUPS
+IN-PROG>
+1.00 HOUR
+IN-PROG>
+3.00 HOURS
+IN-PROG>
+3.00 HOURS
+IN-PROG>
+3.00 HOURS
+uAchieve Self-Service
+6/15/26, 3:38 PM
+My Audit - Audit Results Tab
+https://webapp4.asu.edu/uachieve/audit/read.html?id=JobQueueRun!!!!REDACTED
+5/8
+Upper Division Technical Electives: 6 hours, C minimum
+3.00 Hours Earned
+NEEDS:
+3.00 HOURS
+-> NOT FROM:
+CSE 430 CSE 461 CSE 462 CSE 485 CSE 486 MAT 300 MAT 340 MAT 342 MAT 343
+MAT 485
+COURSE LIST:
+Aerospace: AEE 415 AEE 426 AEE 462 AEE 463 AEE 465 AEE 468 AEE 471
+Arts,Med&EGR: AME 430 AME 435 AME 494 [MEDIA SYNTHESIS]
+Biochemistry: BCH 361 BCH 461 BCH 462
+Bioengineering: BME 350 BME 413 BME 416 BME 494 [*APPL*COMP*BEHAV*]
+Biology: BIO 340 BIO 343 BIO 345
+Chemical Engr: CHE 342 CHE 432 CHE 442 CHE 461 CHE 462 CHE 469 CHE 475
+Civil&Env Engr: CEE 412 CEE 432 CEE 440 CEE 441 CEE 452 CEE 462 CEE 466
+CEE 467 CEE 474 CEE 475 CEE 481 CEE 483 CEE 486
+Comp Info Sys: CIS 415
+Comp.Sci&Engr: CSE 320 CSE 325 CSE 335 CSE 4
+Data Science: DAT 300 DAT 301 DAT 401 DAT 402
+Electrical Eng: EEE 304 EEE 333 EEE 334 EEE 335 EEE 350 EEE 360 EEE 404
+EEE 407 EEE 425 EEE 433 EEE 434 EEE 435 EEE 436 EEE 437 EEE 439
+EEE 443 EEE 445 EEE 448 EEE 455 EEE 459 EEE 460 EEE 463 EEE 470
+EEE 471 EEE 473 EEE 480 EEE 481
+Engineering: FSE 301 FSE 404 FSE 394 [ENGINEERING FOR HUMANITY]
+IndustrialEngr: IEE 376 IEE 385 IEE 412 IEE 426 IEE 431 IEE 456 IEE 458
+IEE 461 IEE 470 IEE 474 IEE 475
+Informatics: CPI 311 CPI 350 CPI 360 CPI 411 CPI 460 CPI 462
+Mech&Aero Engr: MAE 341 MAE 404 MAE 417 MAE 436 MAE 455 MEE 351 MEE 434
+MEE 446 MSE 335 MSE 415
+Mathematics: MAT 3 MAT 4
+Physics: PHY 302 PHY 361 PHY 462
+Prob&Stat: STP 421 STP 425 STP 427 STP 429
+Software Eng: SER 421 SER 422 SER 423
+3)
+SP26
+M IEE 381
+3.00
+C
+LEAN SIX SIGMA METHODOLOGY
+BS COMPUTER SCIENCE MAJOR GPA:
+2.00 Minimum Cumulative GPA.
+EARNED:
+2.47 GPA
+uAchieve Self-Service
+6/15/26, 3:38 PM
+My Audit - Audit Results Tab
+https://webapp4.asu.edu/uachieve/audit/read.html?id=JobQueueRun!!!!REDACTED
+6/8
+Computer Science Major GPA
+-> NOT FROM:
+MAT 300 MAT 340 MAT 342 MAT 343 MAT 485
+COURSE LIST:
+CSE 355 CSE 365 CSE 485 CSE 486 CSE 4
+Aerospace: AEE 415 AEE 426 AEE 462 AEE 463 AEE 465 AEE 468 AEE 471
+Arts,Med&EGR: AME 430 AME 435 AME 494 [MEDIA SYNTHESIS]
+Biochemistry: BCH 361 BCH 461 BCH 462
+Bioengineering: BME 350 BME 413 BME 416 BME 494 [*APPL*COMP*BEHAV*]
+Biology: BIO 340 BIO 343 BIO 345
+Chemical Engr: CHE 342 CHE 432 CHE 442 CHE 461 CHE 462 CHE 469 CHE 475
+Civil&Env Engr: CEE 412 CEE 432 CEE 440 CEE 441 CEE 452 CEE 462 CEE 466
+CEE 467 CEE 474 CEE 475 CEE 481 CEE 483 CEE 486
+Comp Info Sys: CIS 415
+Comp.Sci&Engr: CSE 320 CSE 325 CSE 335 CSE 4
+Data Science: DAT 300 DAT 301 DAT 401 DAT 402
+Electrical Eng: EEE 304 EEE 333 EEE 334 EEE 335 EEE 350 EEE 360 EEE 404
+EEE 407 EEE 425 EEE 433 EEE 434 EEE 435 EEE 436 EEE 437 EEE 439
+EEE 443 EEE 445 EEE 448 EEE 455 EEE 459 EEE 460 EEE 463 EEE 470
+EEE 471 EEE 473 EEE 480 EEE 481
+Engineering: FSE 301 FSE 404 FSE 394 [ENGINEERING FOR HUMANITY]
+IndustrialEngr: IEE 376 IEE 385 IEE 412 IEE 426 IEE 431 IEE 456 IEE 458
+IEE 461 IEE 470 IEE 474 IEE 475
+Informatics: CPI 311 CPI 350 CPI 360 CPI 411 CPI 460 CPI 462
+Mech&Aero Engr: MAE 341 MAE 404 MAE 417 MAE 436 MAE 455 MEE 351 MEE 434
+MEE 446 MSE 335 MSE 415
+Mathematics: MAT 3 MAT 4
+Physics: PHY 302 PHY 361 PHY 462
+Prob&Stat: STP 421 STP 425 STP 427 STP 429
+Software Eng: SER 421 SER 422 SER 423
+IP
+1)
+FA23
+M CSE 110
+3.00
+B
+PRINCIPLES OF PROGRAMMING
+FA23
+M FSE 100
+2.00
+A
+INTRODUCTION TO ENGINEERING
+SP24
+M CSE 205
+3.00
+A
+OBJECT-ORIENTED PROGRAM & DAT
+FA24
+M CSE 240
+3.00
+A-
+INTRO TO PROGRAMMING LANGUAGE
+SP25
+M CSE 301
+1.00
+D
+>R
+COMPUTING ETHICS
+SP25
+M CSE 310
+3.00
+C
+DATA STRUCTURES AND ALGORITHM
+SP25
+M EEE 120
+3.00
+C
+DIGITAL DESIGN FUNDAMENTALS
+FA25
+M CSE 355
+0.00
+E
+INTRO THEORETICAL COMPUTER SC
+FA25
+M CSE 360
+3.00
+D
+>R
+INTRO TO SOFTWARE ENGINEERING
+SP26
+M CSE 230
+3.00
+A
+COMPUTER ORG/ASSEMB LANG PROG
+SP26
+M IEE 381
+3.00
+C
+LEAN SIX SIGMA METHODOLOGY
+SU26
+M CSE 301
+1.00
+NR
+>R
+COMPUTING ETHICS
+SU26
+M CSE 330
+3.00
+NR
+>>
+OPERATING SYSTEMS
+SU26
+M CSE 340
+3.00
+NR
+>>
+PRINCIPLES OF PROGRAMMING LAN
+SU26
+M CSE 360
+3.00
+NR
+>R
+INTRO TO SOFTWARE ENGINEERING
+OPT
+TOTAL HOURS REQUIRED TO COMPLETE THE DEGREE
+NOTE: This NEEDS HOURS section is for STUDENT ATHLETE
+DEVELOPMENT ONLY.
+The NEEDS HOURS note indicates the actual total
+hours required for you to complete this degree.
+NEEDS:
+120.00 HOURS
+OPT
+ELECTIVES: Courses not used to meet specific degree
+requirements.
+NOTE: These hours are being counted in the section
+titled "TOTAL HOURS: 120 hours minimum." If
+the hours are upper division, they are
+also being counted in the "UPPER DIVISION:
+45 hours minimum" section. Two-year community
+college credit is maximum of 64 hours.
+The NEEDS HOURS note indicates the free elective hours
+needed, in addition to the specific degree
+requirements to equal the total hours for this degree.
+NEEDS:
+19.00 HOURS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ELECTIVES HOURS
+These courses are being applied towards the total
+hours for the degree
+10.00 Hours Earned
+NEEDS:
+9.00 HOURS
+SU23
+IFT 101
+3.00
+AP
+INFO TECH PROGRAMMING LOGIC
+SP25
+D PHI 101
+3.00
+A+
+INTRODUCTION TO PHILOSOPHY
+SP25
+M CSE 301
+1.00
+D
+>R
+COMPUTING ETHICS
+FA25
+M CSE 355
+0.00
+E
+INTRO THEORETICAL COMPUTER SC
+FA25
+M CSE 360
+3.00
+D
+>R
+INTRO TO SOFTWARE ENGINEERING
+FA25
+M MAT 343
+0.00
+E
+APPLIED LINEAR ALGEBRA
+************************ END OF ANALYSIS ************************
+uAchieve Self-Service
+6/15/26, 3:38 PM
+My Audit - Audit Results Tab
+https://webapp4.asu.edu/uachieve/audit/read.html?id=JobQueueRun!!!!REDACTED
+7/8
+Copyright © 2019 CollegeSource, Inc. All Rights Reserved.
+Privacy Policy
+SelfService Version: 4.5.3 - 09/10/2019 03:11 PM
+Legend
+- Complete
+- In Progress
+- Unfulfilled
+- Required
+OPT- Optional
+This audit is a guide for checking your completed and in-progress course work against the
+requirements for this academic program. Efforts have been made to ensure its accuracy. However, it is
+your responsibility to know the requirements of your academic program and to comply with them. The
+results of this audit are not intended to override or modify existing program requirements. If you have
+any questions about the accuracy of this report, please see your academic advisor, and check to
+ensure that your student records on file with the Registrar are accurate.
+Maps and Locations
+Jobs
+Directory
+Contact ASU
+My ASU
+Copyright and Trademark
+Accessibility
+Privacy
+Terms of Use
+Emergency
+uAchieve Self-Service
+6/15/26, 3:38 PM
+My Audit - Audit Results Tab
+https://webapp4.asu.edu/uachieve/audit/read.html?id=JobQueueRun!!!!REDACTED
+8/8
