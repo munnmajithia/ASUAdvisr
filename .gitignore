@@ -2,6 +2,9 @@
 .DS_Store
 Thumbs.db
 
+# macOS / sync "duplicate" files (e.g. "extract 2.py", "api 2.ts") — never commit these
+* 2.*
+
 # Claude Code local settings (per-user)
 .claude/settings.local.json
 
