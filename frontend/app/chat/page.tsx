@@ -1,10 +1,18 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { AuthGate } from "@/components/auth-gate";
-import { getCourses, getSchedule, parseConstraints } from "@/lib/api";
-import { DAYS, type ApiConstraints, type Day, type ScheduleOut } from "@/lib/api-types";
+import { getSchedule, parseConstraints } from "@/lib/api";
+import {
+  DAYS,
+  type ApiConstraints,
+  type Day,
+  type Requirement,
+  type ScheduleOut,
+} from "@/lib/api-types";
+import { loadProfile, profileToRequirements, type RequirementProfile } from "@/lib/profile";
 
 const DAY_LABELS: Record<Day, string> = {
   mon: "Mon",
@@ -78,22 +86,45 @@ export default function ChatPage() {
 }
 
 function ChatFlow() {
+  const router = useRouter();
   const [step, setStep] = useState<Step>("input");
   const [chatText, setChatText] = useState("");
   const [constraints, setConstraints] = useState<Constraints>(emptyConstraints());
   const [showEdit, setShowEdit] = useState(false);
-  const [allCourses, setAllCourses] = useState<string[]>([]);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [profile, setProfile] = useState<RequirementProfile | null>(null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [schedules, setSchedules] = useState<ScheduleOut[]>([]);
   const [parsing, setParsing] = useState(false);
   const [scheduling, setScheduling] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Load the confirmed requirement profile once we're inside the authed flow.
+  // No profile means the student hasn't onboarded yet → send them there.
   useEffect(() => {
-    getCourses()
-      .then(setAllCourses)
-      .catch(() => {});
-  }, []);
+    let active = true;
+    loadProfile()
+      .then((loaded) => {
+        if (!active) return;
+        if (loaded === null) {
+          router.replace("/onboarding");
+          return;
+        }
+        setProfile(loaded);
+        setProfileLoaded(true);
+      })
+      .catch((err) => {
+        if (!active) return;
+        setError(err instanceof Error ? err.message : "Failed to load your plan");
+        setProfileLoaded(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [router]);
+
+  // Scheduler input derived from the confirmed profile (no manual picking).
+  const requirements: Requirement[] = profile ? profileToRequirements(profile) : [];
+  const courseKeys: string[] = [...new Set(requirements.flatMap((req) => req.course_keys))];
 
   async function handleParse(e: React.FormEvent) {
     e.preventDefault();
@@ -121,12 +152,12 @@ function ChatFlow() {
 
   async function handleSchedule(e: React.FormEvent) {
     e.preventDefault();
-    if (selected.size === 0) return;
+    if (requirements.length === 0) return;
     setScheduling(true);
     setError(null);
     try {
       const data = await getSchedule({
-        requirements: [...selected].map((key) => ({ course_keys: [key], pick: 1 })),
+        requirements,
         constraints: toApiConstraints(constraints),
         max_results: 50,
       });
@@ -137,14 +168,6 @@ function ChatFlow() {
     } finally {
       setScheduling(false);
     }
-  }
-
-  function toggleCourse(key: string) {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
-      return next;
-    });
   }
 
   function toggleAvoidDay(day: Day) {
@@ -160,7 +183,6 @@ function ChatFlow() {
     setStep("input");
     setChatText("");
     setConstraints(emptyConstraints());
-    setSelected(new Set());
     setSchedules([]);
     setError(null);
     setShowEdit(false);
@@ -168,13 +190,41 @@ function ChatFlow() {
 
   const chips = summaryChips(constraints);
 
+  // Profile still loading (and no error yet) → hold the flow with a placeholder.
+  if (!profileLoaded && error === null) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-10 font-sans">
+        <h1 className="mb-1 text-2xl font-semibold tracking-tight">Chat Scheduler</h1>
+        <p className="text-sm text-zinc-500">Loading your plan…</p>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 font-sans">
       <h1 className="mb-1 text-2xl font-semibold tracking-tight">Chat Scheduler</h1>
       <p className="mb-8 text-sm text-zinc-500">Fall 2026 · CSE courses · M3 prototype</p>
 
+      {/* Signed-in profile with nothing to schedule → dead-end guard. */}
+      {step === "input" && profileLoaded && courseKeys.length === 0 && (
+        <div className="space-y-4">
+          <p className="text-sm text-zinc-600 dark:text-zinc-300">
+            Your plan doesn&rsquo;t have any schedulable courses yet. Open your profile to resolve
+            your remaining requirements into concrete courses, then come back to build a schedule.
+          </p>
+          <button
+            type="button"
+            onClick={() => router.push("/onboarding")}
+            className="rounded-full bg-zinc-900 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+          >
+            Edit profile
+          </button>
+          {error && <ErrorBanner message={error} />}
+        </div>
+      )}
+
       {/* ── Step 1: Chat input ───────────────────────────────────────────────── */}
-      {step === "input" && (
+      {step === "input" && courseKeys.length > 0 && (
         <form onSubmit={handleParse} className="space-y-4">
           <label
             htmlFor="chat-input"
@@ -201,7 +251,7 @@ function ChatFlow() {
         </form>
       )}
 
-      {/* ── Step 2: Confirm constraints + course picker ──────────────────────── */}
+      {/* ── Step 2: Confirm constraints + confirmed courses ──────────────────── */}
       {step === "confirming" && (
         <div className="space-y-8">
           {/* User utterance echo */}
@@ -337,37 +387,44 @@ function ChatFlow() {
             </section>
           )}
 
-          {/* Course picker + submit */}
+          {/* Confirmed courses (read-only) + submit */}
           <form onSubmit={handleSchedule} className="space-y-6">
             <section>
-              <h2 className="mb-3 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Select courses
-              </h2>
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
-                {allCourses.map((key) => {
-                  const on = selected.has(key);
-                  return (
-                    <button
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Scheduling for
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => router.push("/onboarding")}
+                  className="text-xs text-zinc-400 underline underline-offset-2 hover:text-zinc-600 dark:hover:text-zinc-200"
+                >
+                  Edit profile
+                </button>
+              </div>
+              {courseKeys.length === 0 ? (
+                <p className="text-sm text-zinc-500">
+                  Your plan has no schedulable courses yet. Resolve your remaining requirements into
+                  concrete courses, then come back.
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {courseKeys.map((key) => (
+                    <span
                       key={key}
-                      type="button"
-                      onClick={() => toggleCourse(key)}
-                      className={`rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
-                        on
-                          ? "border-blue-600 bg-blue-600 text-white"
-                          : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
-                      }`}
+                      className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
                     >
                       {key}
-                    </button>
-                  );
-                })}
-              </div>
+                    </span>
+                  ))}
+                </div>
+              )}
             </section>
 
             <div className="flex gap-3">
               <button
                 type="submit"
-                disabled={scheduling || selected.size === 0}
+                disabled={scheduling || courseKeys.length === 0}
                 className="rounded-full bg-zinc-900 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-40 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
               >
                 {scheduling ? "Finding schedules…" : "Build schedule"}
