@@ -29,7 +29,9 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       })
       .catch((err: unknown) => {
         // Don't get stuck on "Loading…" — fall back to the sign-in form and surface why.
-        setError(err instanceof Error ? err.message : "Couldn’t check your session. Please sign in.");
+        setError(
+          err instanceof Error ? err.message : "Couldn’t check your session. Please sign in.",
+        );
         setAuth({ status: "signed_out" });
       });
     const {
