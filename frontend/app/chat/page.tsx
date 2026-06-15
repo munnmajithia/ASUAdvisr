@@ -76,12 +76,10 @@ function summaryChips(c: Constraints): string[] {
     chips.push(`No ${c.avoid_days.map((d) => DAY_LABELS[d]).join(", ")}`);
   if (c.earliest_start) chips.push(`After ${c.earliest_start}`);
   if (c.latest_end) chips.push(`Before ${c.latest_end}`);
-  if (c.min_credits && c.max_credits)
-    chips.push(`${c.min_credits}–${c.max_credits} credits`);
+  if (c.min_credits && c.max_credits) chips.push(`${c.min_credits}–${c.max_credits} credits`);
   else if (c.min_credits) chips.push(`Min ${c.min_credits} credits`);
   else if (c.max_credits) chips.push(`Max ${c.max_credits} credits`);
-  if (c.preferred_modality)
-    chips.push(MODE_LABELS[c.preferred_modality] ?? c.preferred_modality);
+  if (c.preferred_modality) chips.push(MODE_LABELS[c.preferred_modality] ?? c.preferred_modality);
   return chips;
 }
 
@@ -219,7 +217,7 @@ function ChatFlow() {
             onChange={(e) => setChatText(e.target.value)}
             rows={3}
             placeholder="e.g. no Friday classes, nothing before 10am, 12–15 credits"
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
           />
           <button
             type="submit"
@@ -236,7 +234,7 @@ function ChatFlow() {
       {step === "confirming" && (
         <div className="space-y-8">
           {/* User utterance echo */}
-          <blockquote className="border-l-2 border-zinc-300 pl-4 text-sm italic text-zinc-500 dark:border-zinc-600">
+          <blockquote className="border-l-2 border-zinc-300 pl-4 text-sm text-zinc-500 italic dark:border-zinc-600">
             &ldquo;{chatText}&rdquo;
           </blockquote>
 
@@ -478,11 +476,11 @@ function ScheduleCard({ schedule, index }: { schedule: ScheduleOut; index: numbe
       <table className="w-full text-xs">
         <thead>
           <tr className="text-left text-zinc-400">
-            <th className="pb-1 pr-4 font-medium">Class #</th>
-            <th className="pb-1 pr-4 font-medium">Course</th>
-            <th className="pb-1 pr-4 font-medium">Type</th>
-            <th className="pb-1 pr-4 font-medium">Mode</th>
-            <th className="pb-1 pr-4 font-medium">Days</th>
+            <th className="pr-4 pb-1 font-medium">Class #</th>
+            <th className="pr-4 pb-1 font-medium">Course</th>
+            <th className="pr-4 pb-1 font-medium">Type</th>
+            <th className="pr-4 pb-1 font-medium">Mode</th>
+            <th className="pr-4 pb-1 font-medium">Days</th>
             <th className="pb-1 font-medium">Time</th>
           </tr>
         </thead>
