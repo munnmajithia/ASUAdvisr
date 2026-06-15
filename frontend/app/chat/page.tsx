@@ -410,7 +410,9 @@ function ChatFlow() {
                     </select>
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs text-zinc-500">Preferred time of day</label>
+                    <label className="mb-1 block text-xs text-zinc-500">
+                      Preferred time of day
+                    </label>
                     <select
                       value={constraints.prefer_time_of_day}
                       onChange={(e) =>
