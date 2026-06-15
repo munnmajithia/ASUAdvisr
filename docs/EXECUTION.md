@@ -1,97 +1,86 @@
 # Execution Board — MVP completion
 
-The live tactical board for finishing the MVP. Strategy lives in [VISION.md](VISION.md); phases in
-[ROADMAP.md](ROADMAP.md). Process rules: [CONTRIBUTING.md](../CONTRIBUTING.md).
+The live tactical board. Strategy: [VISION.md](VISION.md); phases: [ROADMAP.md](ROADMAP.md).
+Process rules: [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-**How to use this board:** pick the lowest-numbered task whose dependencies are merged, follow the
-PR lifecycle in `CONTRIBUTING.md`, and check it off when its PR is marked ready. Internally we still
-think in milestones (M4 = requirement extraction); PR titles never use those labels.
+**How to use this board:** pick the highest-priority task in your lane whose dependencies are
+merged, claim it (PR with the suggested title), follow the PR lifecycle in `CONTRIBUTING.md`
+(branch → draft PR → gates between commits → self-review → `gh pr ready`). One task = one PR.
+Conventional-commit titles; never milestone labels in titles.
 
-## What's done
-M1.0 scaffold · M1.1 data foundation · M2 scheduler+API+UI · M3 NL constraint parser + chat UI +
-magic-link auth. Remaining MVP work = M4 (DARS extraction + review) + integration glue + selected
-low-hanging add-ons.
+## Status (updated 2026-06-15)
+
+The backend MVP is **feature-complete and merged**. A pre-test audit found the remaining work is
+almost entirely the **M4 frontend layer** (it doesn't exist yet) plus a few backend correctness
+fixes. The fix list below is the path to a testable end-to-end MVP.
+
+**Merged on `main`:** contributor docs/board · requirement-profile contract (`llm/requirement_profile.py`)
+· PDF util (`pdf/extract.py`) · migration `0002_requirement_profiles.sql` (RLS) · DARS extractor
+(`llm/dars_extractor.py`) · `POST /extract-requirements` endpoint · seat status + open-only filter
+· instructor names · soft-constraint ranking (`scheduler/rank.py`) · CI fix · typed frontend API
+client (`lib/api.ts`) · AuthGate robustness.
 
 ## Locked decisions
 - **Persistence = stateless backend + frontend-direct Supabase.** Backend extracts and schedules
-  only; no user state, no JWT verification. The frontend persists the *confirmed* profile via the
-  authenticated Supabase client; RLS scopes every row to `auth.uid()`.
-- **Canonical `RequirementProfile`** (one shape across Python model, SQL tables, TS type):
+  only; no user state, no JWT. The frontend persists the *confirmed* profile via the authenticated
+  Supabase client; RLS scopes every row to `auth.uid()`.
+- **No `Authorization` header on API calls.** The backend verifies no JWT (stateless); per-user
+  data is written frontend-direct through the RLS-scoped Supabase client. Do **not** add a bearer
+  header to `lib/api.ts` (resolves the old task-5 gate note).
+- **Canonical `RequirementProfile`** — the **wired** shape (in `llm/requirement_profile.py`, matched
+  by migration 0002 and the planned TS type):
   ```jsonc
   {
-    "catalog_year": "2024-2025",
-    "major": "Computer Science",
+    "catalog_year": "2024-2025", "major": "Computer Science",
     "completed_courses": ["CSE 110", "MAT 265"],
     "required_courses_remaining": ["CSE 310", "CSE 355"],
     "choice_groups": [{ "name": "CS Electives", "pick": 1, "course_keys": ["CSE 412", "CSE 420"] }]
   }
   ```
-  Course keys normalize to `"SUBJECT CATALOG_NBR"`. Map to the scheduler's `{course_keys, pick}`:
-  required course → `{course_keys:[c], pick:1}`; choice group → `{course_keys, pick}`; completed
-  excluded. The executing mapping is in TypeScript (frontend calls `/schedule`); a mirrored,
-  unit-tested Python helper documents the contract.
-- **Add-ons in scope:** seat status + open-only filter, soft-constraint ranking, instructor names.
-  **Calendar (.ics) export is deferred.**
+  Map to the scheduler's `{course_keys, pick}`: required → `{course_keys:[c], pick:1}`; choice group
+  with keys → `{course_keys, pick}`; completed + keyless-filter-only groups excluded. (The richer
+  `requirement_extractor.py` schema is dead/unwired and is being retired — see B2.)
 
-## Dependency DAG
+## Ownership lanes
+- **Backend lane → owned by the active session (claude).** B1–B3 + the local venv fix.
+- **Frontend lane → handoff to other instances.** F1–F9. Work in your own clone/worktree.
+
+## Fix tasks (from the 2026-06-15 pre-test audit)
+
+### Backend lane (claude is on these)
+| ID | Priority | PR title | Key files / goal | Deps |
+|----|----------|----------|------------------|------|
+| B1 | P0 | `chore: remove stray duplicate files` | Delete 10 untracked `* 2.*` macOS dups (4 under `backend/src` are linted/typed; also `frontend/lib/*  2.ts`, dup `0002 2.sql`, `* 2.md`). `find . -name '* 2.*' -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/.next/*' -delete`; add `* 2.*` to `.gitignore`. | — |
+| B2 | P1 | `refactor: consolidate DARS extractors` | Keep the wired `dars_extractor.py`/`requirement_profile.py`. Port the dead `requirement_extractor.py`'s guards (raise on `stop_reason=='max_tokens'`; replace bare `next(...)` over tool-use blocks — **throws unhandled `StopIteration` on an LLM refusal** — with a clear `RuntimeError`) and its uAchieve/DARS prompt into `dars_extractor.py`; migrate its real-DARS fixture test; then delete `requirement_extractor.py` + its test. | — |
+| B3 | P1 | `fix: guard scheduler against empty-options requirements` | `to_requirements()` must report dropped keyless groups (not skip silently); never let an empty-`course_keys` `CourseRequirement` reach `enumerate_schedules` (which returns `[]` for any unsatisfiable req); `/schedule` should signal which reqs yielded zero candidates. Test: keyless/wildcard-only profile doesn't silently yield `[]`. | — |
+| — | P2 | (local, no PR) regenerate `.venv` | `backend/.venv/.../asuadvisr.pth` is malformed (`import _virtualenv` run into the src path). `uv sync --reinstall`. Local-only; gates/CI unaffected. | — |
+
+### Frontend lane (handoff)
+| ID | Priority | PR title | Key files / goal | Deps |
+|----|----------|----------|------------------|------|
+| F1 | P0 | `feat: add extractProfile multipart helper` | `lib/api.ts`: `extractProfile(file): Promise<RequirementProfile>` — `FormData` with key `file` (endpoint param is `Annotated[UploadFile, File()]`). `request()` force-sets JSON content-type, so special-case `FormData` (let the browser set the multipart boundary) or use a dedicated fetch. No auth header. | — |
+| F2 | P0 | `feat: requirement-profile data layer` | `lib/profile.ts`: TS `RequirementProfile` (wired shape above) + `saveProfile`/`loadProfile` via `getBrowserSupabase()` (parent + 4 child tables, `user_id` from session) + `profileToRequirements()` mapping. | migration (merged) |
+| F3 | P0 | `feat: mandatory editable requirement review UI` | `components/requirement-review.tsx`: editable form over the draft profile. **Must visibly warn on every keyless / filter-only choice group and require concrete `course_keys`** (else scheduling silently returns zero — see B3). Confirm → `saveProfile()` → `/chat`. | F2 |
+| F4 | P0 | `feat: DARS upload onboarding page` | `app/onboarding/page.tsx` in `<AuthGate>`: PDF input (reject non-PDF) → `extractProfile(file)` → draft → `<RequirementReview>`. Surface 422 / 502 / backend-down. | F1, F3 |
+| F5 | P0 | `feat: drive chat from confirmed profile` | `app/chat/page.tsx`: `loadProfile()` on mount (→ `/onboarding` if none); build requirements from `profileToRequirements()` not the manual picker; confirmed courses read-only + 'edit profile' link. **Sole owner of `chat/page.tsx`** (sequence F8 after). | F2 |
+| F6 | P0 | `feat: auth-aware landing page` | Replace `app/page.tsx` (still create-next-app template); update `layout.tsx` metadata to ASUAdvisr. Routing: signed-out → sign-in; signed-in → `loadProfile()` → `/onboarding` or `/chat`. **Sole owner of `layout.tsx`**. | F2 |
+| F7 | P1 | `chore: sync api-types with current API` | `lib/api-types.ts`: add `enrl_stat`, `is_open`, `instructors` to `SectionDetail`; add `only_open`, `compact_schedule`, `prefer_time_of_day` to `ApiConstraints`. Prereq for F8. | — |
+| F8 | P1 | `feat: enrich results UI` | Shared `ScheduleCard`: Open/Closed badge (`is_open`) + instructor line; confirming step gets only-open toggle + `compact_schedule`/`prefer_time_of_day` controls threaded through `toApiConstraints`. | F7, F5 |
+| F9 | P2 | `chore: retire or convert old schedule page` | `app/schedule/page.tsx` is a divergent M2 prototype (no AuthGate). Retire it or convert to the profile-driven path behind AuthGate using the shared `ScheduleCard`. | F5 |
+
+### Frontend dependency DAG
 ```
-            ┌─ #1 contract ──┬──────────────► #6 extractor ──► #8 extract-endpoint
- Setup ─┬───┤  #2 pdf-util ──┘                    ▲
-        │   ├─ #3 migration ─────────────┐        │
-        │   ├─ #4 dars-fixture ──────────┴── feeds tests
-        │   └─ #5 api-client ─┬─► #7 data-layer ─┬─► #10 review-ui ─┐
-        │                     │                  ├─► #11 landing ───┼─► #12 chat-from-profile ─► #16 enrich-ui
-        │                     └─► #9 upload-page ─┘ (needs #8)       ┘
-        └─ #13 seats · #14 instructors · #15 ranking  (backend-only, interleave) ──► #16
+F1 ─┐                         ┌─► F3 ─┐
+    │                         │       ├─► F4
+F2 ─┼─────────────────────────┼─► F5 ─┼─► F8   (F8 also needs F7)
+    │                         └─► F6  │
+F7 ─┘                                 └─► F9
 ```
+Start-now (no deps): **F1, F2, F7**, and **B1, B2, B3**. Hotspots: `chat/page.tsx` → F5 then F8;
+`layout.tsx` → F6 only.
 
-## Waves
-- **W1 (parallel):** #1, #2, #3, #4, #5 — start as soon as Setup merges.
-- **W2 (parallel):** #6, #7, and add-ons #13, #14, #15 interleave (backend-only).
-- **W3 (parallel):** #8, #9, #10, #11.
-- **W4:** #12 (chat convergence).
-- **W5:** #16 (consolidated results UI for the add-ons).
-
-## Hotspot single-owner rule
-- `frontend/app/layout.tsx` → #11 only.
-- `frontend/app/chat/page.tsx` → #12, then #16 (sequence #16 after #12).
-- `SectionDetail` in `backend/src/asuadvisr/api/main.py` → #8 adds it; #13 and #14 extend it (rebase
-  those two against each other).
-- `frontend/lib/api.ts` / `frontend/lib/types.ts` → created by #5, appended by #9.
-
-## Tasks
-
-### Core flow
-| # | PR title | Goal (key files) | Deps | Gate + tests |
-|---|---|---|---|---|
-| 1 | `feat: add requirement profile contract` | `backend/src/asuadvisr/llm/requirement_profile.py`: Pydantic `RequirementProfile` + `ChoiceGroup` (`choose`/`pick` alias), `to_requirements()` → `list[CourseRequirement]`, key normalization. | — | mypy; `test_requirement_profile.py`: defaults, alias, required→reqs, group→reqs, normalization. |
-| 2 | `feat: add PDF text-extraction utility` | `backend/src/asuadvisr/pdf/extract.py`: `extract_text_from_bytes`, `extract_text_from_path`, `PdfExtractionError`. Wraps PyMuPDF. | — | `test_pdf_extract.py`: text from sample PDF; raises on empty/garbage; bytes==path. |
-| 3 | `feat: add requirement profile tables with RLS` | `supabase/migrations/0002_requirement_profiles.sql`: profile + 4 child tables; RLS `USING/WITH CHECK (auth.uid() = user_id)`; child tables via `EXISTS` on parent; indexes. | — (sync shape w/ #1) | `supabase db reset` applies; user A's row invisible to user B (manual check). |
-| 4 | `test: add sanitized DARS fixture` | `backend/tests/fixtures/dars_sample.txt` + synthetic `dars_sample.pdf` + `fixtures/README.md`; `.gitignore` real-DARS patterns; optional env-driven `test_fixture_has_no_pii`. Never commit real DARS. | — | manual no-PII review; readable by #2. |
-| 5 | `chore: add shared API client with auth token` | `frontend/lib/api.ts` (+ `lib/types.ts`): `API_BASE`, `apiFetch<T>` with `!res.ok` throw + `Authorization: Bearer <token>`; typed `getCourses/parseConstraints/postSchedule`; move shared interfaces. | — | lint+typecheck+build; `/schedule` still works; request carries auth header when signed in. |
-| 6 | `feat: add DARS requirement extractor` | `backend/src/asuadvisr/llm/dars_extractor.py`: `extract_profile(text, client=None)`. Clone of `constraint_parser.py` (Haiku 4.5, forced tool_use, caching, `max_tokens≈2048`). | 1, 4 | mypy; `test_dars_extractor.py` (mock client): completed/required/choice-group alias, empty→default, tool forced, text forwarded. |
-| 7 | `feat: requirement-profile data layer` | `frontend/lib/profile.ts`: TS `RequirementProfile`, `loadProfile`/`saveProfile` via authed Supabase (sets `user_id`), `profileToRequirements`. | 5, (3 soft) | lint+typecheck+build; save→load round-trip; eyeball mapping. |
-| 8 | `feat: extract requirement profile from DARS PDF` | `api/main.py`: `POST /extract-requirements` (multipart) → text (422 on `PdfExtractionError`) → `extract_profile` (502 on failure) → `RequirementProfile`. Stateless. | 1, 2, 6 | `test_api.py` (TestClient, monkeypatched extractor): 200 / 422 / 502. |
-| 9 | `feat: DARS PDF upload page` | `frontend/app/onboarding/page.tsx` in `<AuthGate>`: PDF input → `extractProfile(file)` (added to `lib/api.ts`) → draft → review UI. | 5, (8 for live) | lint+typecheck+build; upload → draft renders; non-PDF rejected; backend-down error. |
-| 10 | `feat: mandatory editable requirement review UI` | `frontend/components/requirement-review.tsx`: editable form over the draft; "Confirm" → `saveProfile()` → route to `/chat`. | 7 | lint+typecheck+build; edit every field; add/remove group; confirm persists across reload. |
-| 11 | `feat: auth-aware landing page` | replace `frontend/app/page.tsx`; update `layout.tsx` metadata. Routing: signed-out→sign-in; no-profile→`/onboarding`; has-profile→`/chat`. | 7 | lint+typecheck+build; all three routing branches; no boilerplate left. |
-| 12 | `feat: drive chat scheduling from confirmed profile` | `frontend/app/chat/page.tsx`: replace manual picker with `loadProfile()` (redirect to onboarding if none) → request from `profileToRequirements`. Keep parse/confirm/results. | 7, 9, 10, 11 | lint+typecheck+build; full end-to-end chain. |
-
-### Add-ons (interleaved)
-| # | PR title | Goal (key files) | Deps | Gate + tests |
-|---|---|---|---|---|
-| 13 | `feat: surface section seat status with open-only filter` | `enrl_stat` (+ seats) into `SectionDetail` (`api/main.py`); `only_open` in `ConstraintsIn`/`ScheduleConstraints` + filter in `scheduler/constraints.py`. | — (rebase vs #14 on `SectionDetail`) | mypy; `test_scheduler.py`: only-open reduces results; `test_api.py`: status present. |
-| 14 | `feat: add instructor names to scheduler output` | `instructors: list[str]` on `SectionNode`; parse in `load_sections_from_fixture` reusing `scraper/parse.py:_parse_instructors` decode; surface in `SectionDetail`. | — (rebase vs #13 on `SectionDetail`) | mypy; `test_scheduler.py`: known fixture section → expected instructor(s). |
-| 15 | `feat: rank schedules by soft constraints` | soft prefs (`compact_schedule`, `prefer_time_of_day`) in `constraint_parser.py` + `ParsedConstraints`; `scheduler/rank.py` scorer; `enumerate_schedules` collects to internal cap within timeout, ranks, returns top `max_results`. | — (independent files) | mypy; `test_rank.py`: compact beats spread, time-of-day order; parser extracts soft prefs; timeout/cap respected. |
-| 16 | `feat: enrich schedule UI with seats, instructors, and preference controls` | `chat/page.tsx` + shared `ScheduleCard`: Open/Closed badge + instructor names on cards; only-open toggle + soft-pref controls in the confirming step. | 12, 13, 14, 15 | lint+typecheck+build; badges/instructors render; open-only filters; soft prefs reorder. |
-
-## Internal milestone → PR title mapping
-| Internal | Readable PR title(s) |
-|---|---|
-| Process/docs | `docs: add contributor workflow and execution board` |
-| M4 contract/schema | `feat: add requirement profile contract` · `feat: add requirement profile tables with RLS` |
-| M4 extraction | `feat: add PDF text-extraction utility` · `feat: add DARS requirement extractor` · `feat: extract requirement profile from DARS PDF` |
-| M4 review/onboarding | `feat: DARS PDF upload page` · `feat: mandatory editable requirement review UI` |
-| Integration glue | `chore: add shared API client with auth token` · `feat: requirement-profile data layer` · `feat: auth-aware landing page` · `feat: drive chat scheduling from confirmed profile` |
-| Add-ons | `feat: surface section seat status with open-only filter` · `feat: add instructor names to scheduler output` · `feat: rank schedules by soft constraints` · `feat: enrich schedule UI with seats, instructors, and preference controls` |
-| M5 | user test (non-code) |
+## Closing gate
+After the P0 lane lands: full end-to-end manual run — sign in → upload the sanitized DARS
+(`backend/tests/fixtures/dars/dars_sanitized.pdf`) → review/edit (resolve keyless groups) → confirm
+→ chat constraints → schedules render (with seats/instructors/ranking once F8 lands) → copy class
+numbers. Then M5 (5 ASU CS students; non-code).
