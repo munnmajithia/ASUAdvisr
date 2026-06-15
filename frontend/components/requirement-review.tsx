@@ -42,9 +42,7 @@ export function RequirementReview({ draft }: { draft: RequirementProfile }) {
   function updateCompleted(index: number, patch: Partial<CompletedCourse>) {
     setProfile((p) => ({
       ...p,
-      completed_courses: p.completed_courses.map((c, i) =>
-        i === index ? { ...c, ...patch } : c,
-      ),
+      completed_courses: p.completed_courses.map((c, i) => (i === index ? { ...c, ...patch } : c)),
     }));
   }
 
