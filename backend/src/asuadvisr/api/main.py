@@ -5,12 +5,16 @@ from __future__ import annotations
 from datetime import time
 from functools import lru_cache
 from pathlib import Path
+from typing import Annotated
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from asuadvisr.llm.constraint_parser import ParsedConstraints, parse_constraints
+from asuadvisr.llm.dars_extractor import extract_profile
+from asuadvisr.llm.requirement_profile import RequirementProfile
+from asuadvisr.pdf.extract import PdfExtractionError, extract_text_from_bytes
 from asuadvisr.scheduler.constraints import Day, ScheduleConstraints
 from asuadvisr.scheduler.enumerate import (
     CourseRequirement,
@@ -206,3 +210,21 @@ def schedule(req: ScheduleRequest) -> ScheduleResponse:
         schedules=[_build_output(s, node_index) for s in results],
         count=len(results),
     )
+
+
+@app.post("/extract-requirements", response_model=RequirementProfile)
+async def extract_requirements(file: Annotated[UploadFile, File()]) -> RequirementProfile:
+    """Extract a draft RequirementProfile from an uploaded DARS / major-map PDF.
+
+    Stateless: returns the parsed profile for the user to review and confirm. The
+    confirmed profile is persisted client-side via Supabase (RLS-scoped), not here.
+    """
+    data = await file.read()
+    try:
+        text = extract_text_from_bytes(data)
+    except PdfExtractionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    try:
+        return extract_profile(text)
+    except Exception as exc:  # LLM / upstream failure
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
