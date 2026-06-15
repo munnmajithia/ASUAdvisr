@@ -322,3 +322,23 @@ def test_only_open_excludes_closed_sections() -> None:
     assert len(all_results) == 2  # both sections schedulable by default
     assert len(open_only) == 1  # closed section filtered out
     assert open_only[0].section_ids == [1]
+
+
+def test_compact_preference_ranks_results() -> None:
+    # Course A meets Monday; course B has a Monday option and a Friday option.
+    a_mon = _section(1, "AAA 101", assoc="1", slots=[_slot("M", "09:00", "09:50")])
+    b_mon = _section(2, "BBB 101", assoc="1", slots=[_slot("M", "10:00", "10:50")])
+    b_fri = _section(3, "BBB 101", assoc="2", slots=[_slot("F", "10:00", "10:50")])
+    by_course = {"AAA 101": [a_mon], "BBB 101": [b_mon, b_fri]}
+    reqs = [
+        CourseRequirement(course_keys=["AAA 101"]),
+        CourseRequirement(course_keys=["BBB 101"]),
+    ]
+
+    results = enumerate_schedules(
+        reqs, by_course, ScheduleConstraints(compact_schedule=True), max_results=50
+    )
+    assert len(results) == 2
+    # The all-Monday combination (1 day) should rank ahead of the Mon+Fri (2 days).
+    assert set(results[0].section_ids) == {1, 2}
+    assert set(results[1].section_ids) == {1, 3}

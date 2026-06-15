@@ -57,6 +57,8 @@ class ConstraintsIn(BaseModel):
     max_credits: float | None = None
     preferred_modality: str | None = None
     only_open: bool = False
+    compact_schedule: bool = False
+    prefer_time_of_day: str | None = None
 
     def to_domain(self) -> ScheduleConstraints:
         def _t(s: str | None) -> time | None:
@@ -73,6 +75,8 @@ class ConstraintsIn(BaseModel):
             max_credits=self.max_credits,
             preferred_modality=self.preferred_modality,
             only_open=self.only_open,
+            compact_schedule=self.compact_schedule,
+            prefer_time_of_day=self.prefer_time_of_day,
         )
 
 
