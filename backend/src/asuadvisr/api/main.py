@@ -52,6 +52,7 @@ class ConstraintsIn(BaseModel):
     min_credits: float | None = None
     max_credits: float | None = None
     preferred_modality: str | None = None
+    only_open: bool = False
 
     def to_domain(self) -> ScheduleConstraints:
         def _t(s: str | None) -> time | None:
@@ -67,6 +68,7 @@ class ConstraintsIn(BaseModel):
             min_credits=self.min_credits,
             max_credits=self.max_credits,
             preferred_modality=self.preferred_modality,
+            only_open=self.only_open,
         )
 
 
@@ -83,6 +85,8 @@ class SectionDetail(BaseModel):
     instruction_mode: str
     days: str  # e.g. "MWF"
     time_range: str  # e.g. "9:00 AM - 9:50 AM" or "Async"
+    enrl_stat: str  # 'O' open, 'C' closed, 'W' waitlist, 'X'
+    is_open: bool  # convenience flag: enrl_stat == 'O'
 
 
 class ScheduleOut(BaseModel):
@@ -122,6 +126,8 @@ def _section_detail(node: SectionNode) -> SectionDetail:
             instruction_mode=node.instruction_mode,
             days="",
             time_range="Async",
+            enrl_stat=node.enrl_stat,
+            is_open=node.enrl_stat == "O",
         )
     slot = node.meeting_slots[0]
     days = "".join(abbr for attr, abbr in day_chars if getattr(slot, attr))
@@ -138,6 +144,8 @@ def _section_detail(node: SectionNode) -> SectionDetail:
         instruction_mode=node.instruction_mode,
         days=days,
         time_range=time_range,
+        enrl_stat=node.enrl_stat,
+        is_open=node.enrl_stat == "O",
     )
 
 

@@ -73,6 +73,8 @@ def _iter_picks(
     # Group by assoc_class_label, then by component within each group.
     by_label: dict[str, dict[str, list[SectionNode]]] = {}
     for s in sections:
+        if constraints.only_open and s.enrl_stat != "O":
+            continue  # skip closed/waitlisted sections
         by_label.setdefault(s.assoc_class_label, {}).setdefault(s.component, []).append(s)
 
     for component_map in by_label.values():
