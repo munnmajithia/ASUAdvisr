@@ -91,6 +91,24 @@ def _all_slots(sections: list[SectionNode]) -> list[MeetingSlot]:
     return [slot for s in sections for slot in s.meeting_slots]
 
 
+def candidate_picks(
+    requirement: CourseRequirement,
+    sections_by_course: dict[str, list[SectionNode]],
+    constraints: ScheduleConstraints,
+) -> list[list[SectionNode]]:
+    """Every valid pick for one requirement under the given constraints.
+
+    Empty means the requirement is unsatisfiable as posed: its courses are absent
+    from the data, or every section is filtered out by the constraints. Callers
+    (e.g. the /schedule endpoint) use this to report unsatisfiable requirements
+    instead of letting the whole enumeration silently return nothing.
+    """
+    picks: list[list[SectionNode]] = []
+    for key in requirement.course_keys:
+        picks.extend(_iter_picks(sections_by_course.get(key, []), constraints))
+    return picks
+
+
 # ─── Fixture loader ───────────────────────────────────────────────────────────
 
 
@@ -166,10 +184,7 @@ def enumerate_schedules(
     # A choice group (pick=1 of N) merges all N courses' candidates together.
     candidate_lists: list[list[list[SectionNode]]] = []
     for req in requirements:
-        picks: list[list[SectionNode]] = []
-        for key in req.course_keys:
-            secs = sections_by_course.get(key, [])
-            picks.extend(_iter_picks(secs, constraints))
+        picks = candidate_picks(req, sections_by_course, constraints)
         if not picks:
             return []  # requirement is unsatisfiable
         candidate_lists.append(picks)

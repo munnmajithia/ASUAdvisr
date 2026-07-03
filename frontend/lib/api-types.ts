@@ -66,10 +66,24 @@ export interface ScheduleOut {
   total_credits: number;
 }
 
+/**
+ * Matches `DroppedRequirement` — a requested requirement the backend excluded
+ * from scheduling. `unresolved`: no concrete course options (wildcard/open
+ * elective); `no_candidates`: concrete options but zero schedulable sections
+ * (unknown course, or everything filtered out by the constraints).
+ */
+export interface DroppedRequirement {
+  course_keys: string[];
+  pick: number;
+  reason: "unresolved" | "no_candidates";
+  detail: string;
+}
+
 /** Matches `ScheduleResponse`. */
 export interface ScheduleResponse {
   schedules: ScheduleOut[];
   count: number;
+  dropped: DroppedRequirement[];
 }
 
 /** Response of `GET /courses`. */
