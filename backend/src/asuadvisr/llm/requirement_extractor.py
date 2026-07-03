@@ -22,6 +22,7 @@ The remaining-requirement shape mirrors the scheduler's ``CourseRequirement``
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -33,6 +34,8 @@ from asuadvisr.scheduler.enumerate import CourseRequirement
 from asuadvisr.settings import get_settings
 
 _MODEL = "claude-opus-4-8"
+
+logger = logging.getLogger(__name__)
 
 
 # ─── Output schema ──────────────────────────────────────────────────────────
@@ -103,8 +106,16 @@ class RequirementProfile(BaseModel):
         can't be scheduled until the student resolves them into concrete courses in
         the review UI (see :meth:`unresolved_requirements`). This guarantees no
         empty-``course_keys`` requirement reaches the enumerator (which would make the
-        whole request unsatisfiable).
+        whole request unsatisfiable). The exclusion is logged so it never happens
+        silently; callers should surface :meth:`unresolved_requirements` to the user.
         """
+        unresolved = self.unresolved_requirements()
+        if unresolved:
+            logger.warning(
+                "excluding %d unresolved requirement(s) from scheduling: %s",
+                len(unresolved),
+                "; ".join(r.label for r in unresolved),
+            )
         return [
             CourseRequirement(course_keys=list(req.options), pick=req.pick)
             for req in self.remaining_requirements

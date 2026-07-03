@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import time
 from functools import lru_cache
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,6 +19,7 @@ from asuadvisr.scheduler.enumerate import (
     CourseRequirement,
     Schedule,
     SectionNode,
+    candidate_picks,
     enumerate_schedules,
     load_sections_from_fixture,
 )
@@ -102,9 +103,25 @@ class ScheduleOut(BaseModel):
     total_credits: float
 
 
+class DroppedRequirement(BaseModel):
+    """A requested requirement that was excluded from scheduling, and why.
+
+    `unresolved`: no concrete course options (wildcard/open elective) — the
+    student must resolve it in the profile review. `no_candidates`: the options
+    are concrete but yield zero schedulable sections (unknown course, or every
+    section filtered out by the constraints).
+    """
+
+    course_keys: list[str]
+    pick: int
+    reason: Literal["unresolved", "no_candidates"]
+    detail: str
+
+
 class ScheduleResponse(BaseModel):
     schedules: list[ScheduleOut]
     count: int
+    dropped: list[DroppedRequirement] = []
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -166,6 +183,18 @@ def _build_output(schedule: Schedule, node_index: dict[int, SectionNode]) -> Sch
     return ScheduleOut(sections=sections, total_credits=schedule.total_credits)
 
 
+def _no_candidates_detail(
+    course_keys: list[str], sections_by_course: dict[str, list[SectionNode]]
+) -> str:
+    unknown = [k for k in course_keys if k not in sections_by_course]
+    if not unknown:
+        return "no sections satisfy the current constraints"
+    detail = f"not in the loaded term data: {', '.join(unknown)}"
+    if len(unknown) < len(course_keys):
+        detail += "; the other options have no sections satisfying the current constraints"
+    return detail
+
+
 class ParseConstraintsRequest(BaseModel):
     text: str
 
@@ -202,12 +231,46 @@ def schedule(req: ScheduleRequest) -> ScheduleResponse:
         node.id: node for nodes in sections_by_course.values() for node in nodes
     }
 
-    requirements = [
-        CourseRequirement(course_keys=r.course_keys, pick=r.pick) for r in req.requirements
-    ]
     constraints = req.constraints.to_domain()
+
+    # Partition into schedulable vs. dropped requirements. An unresolved or
+    # unsatisfiable requirement is excluded and reported instead of silently
+    # making the whole enumeration return zero schedules.
+    schedulable: list[CourseRequirement] = []
+    dropped: list[DroppedRequirement] = []
+    for r in req.requirements:
+        if not r.course_keys:
+            dropped.append(
+                DroppedRequirement(
+                    course_keys=[],
+                    pick=r.pick,
+                    reason="unresolved",
+                    detail=(
+                        "no concrete course options; resolve this requirement in the profile review"
+                    ),
+                )
+            )
+            continue
+        requirement = CourseRequirement(course_keys=r.course_keys, pick=r.pick)
+        if not candidate_picks(requirement, sections_by_course, constraints):
+            dropped.append(
+                DroppedRequirement(
+                    course_keys=r.course_keys,
+                    pick=r.pick,
+                    reason="no_candidates",
+                    detail=_no_candidates_detail(r.course_keys, sections_by_course),
+                )
+            )
+            continue
+        schedulable.append(requirement)
+
+    if not schedulable:
+        # Nothing left to enumerate: report why rather than fabricating the
+        # degenerate empty schedule the enumerator yields for zero requirements.
+        return ScheduleResponse(schedules=[], count=0, dropped=dropped)
+
     results: list[Schedule] = enumerate_schedules(
-        requirements=requirements,
+        requirements=schedulable,
         sections_by_course=sections_by_course,
         constraints=constraints,
         max_results=req.max_results,
@@ -215,6 +278,7 @@ def schedule(req: ScheduleRequest) -> ScheduleResponse:
     return ScheduleResponse(
         schedules=[_build_output(s, node_index) for s in results],
         count=len(results),
+        dropped=dropped,
     )
 
 

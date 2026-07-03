@@ -7,6 +7,7 @@ Runs against the committed, PII-free sanitized DARS fixture (see
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
@@ -214,3 +215,11 @@ def test_unresolved_requirements_are_keyless() -> None:
     assert [r.label for r in unresolved] == ["CSE 4xx Electives"]
     # Guarantee: no empty-course_keys requirement ever reaches the enumerator.
     assert all(r.course_keys for r in profile.to_requirements())
+
+
+def test_to_requirements_warns_on_excluded_unresolved(caplog: pytest.LogCaptureFixture) -> None:
+    """Excluding unresolved requirements from scheduling must not be silent."""
+    profile = extract_requirements("<audit text>", client=_mock_client(_SAMPLE_INPUT))
+    with caplog.at_level(logging.WARNING, logger="asuadvisr.llm.requirement_extractor"):
+        profile.to_requirements()
+    assert "CSE 4xx Electives" in caplog.text

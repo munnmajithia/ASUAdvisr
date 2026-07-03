@@ -52,6 +52,47 @@ def test_only_open_constraint_accepted() -> None:
     assert isinstance(resp.schedules, list)
 
 
+def test_unresolved_requirement_is_reported_not_silent() -> None:
+    """A wildcard-only profile (no concrete options) must not silently yield []."""
+    resp = schedule(ScheduleRequest(requirements=[RequirementIn(course_keys=[])]))
+    assert resp.schedules == []
+    assert resp.count == 0
+    assert len(resp.dropped) == 1
+    assert resp.dropped[0].reason == "unresolved"
+
+
+def test_unknown_course_is_reported_as_no_candidates() -> None:
+    resp = schedule(ScheduleRequest(requirements=[RequirementIn(course_keys=["ZZZ 999"])]))
+    assert resp.schedules == []
+    assert resp.count == 0
+    assert len(resp.dropped) == 1
+    assert resp.dropped[0].reason == "no_candidates"
+    assert "ZZZ 999" in resp.dropped[0].detail
+
+
+def test_dropped_requirement_does_not_block_others() -> None:
+    """An unresolved requirement is excluded and reported; the rest still schedule."""
+    courses = list_courses()["courses"]
+    for key in courses[:10]:
+        resp = schedule(
+            ScheduleRequest(
+                requirements=[RequirementIn(course_keys=[key]), RequirementIn(course_keys=[])],
+                max_results=5,
+            )
+        )
+        if resp.schedules:
+            assert [d.reason for d in resp.dropped] == ["unresolved"]
+            assert all(s.course_key == key for s in resp.schedules[0].sections)
+            return
+    pytest.skip("no schedulable course found in first 10 fixture courses")
+
+
+def test_satisfiable_request_reports_no_dropped() -> None:
+    courses = list_courses()["courses"]
+    resp = schedule(ScheduleRequest(requirements=[RequirementIn(course_keys=[courses[0]])]))
+    assert resp.dropped == []
+
+
 def test_only_open_sections_are_open() -> None:
     """When only_open is set, every section in every returned schedule is open."""
     courses = list_courses()["courses"]
